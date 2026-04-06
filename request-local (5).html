@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>請求書</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f4f8;font-family:'Noto Sans JP','Meiryo',sans-serif;color:#1a1a2e;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+.layout{display:grid;grid-template-columns:210px 1fr;gap:16px;padding:16px;max-width:1280px;margin:0 auto}
+.panel{background:#fff;border:1px solid #dce6f0;border-radius:10px;padding:14px;position:sticky;top:12px;height:fit-content;max-height:calc(100vh - 24px);overflow-y:auto}
+.panel h2{font-size:14px;font-weight:700;color:#1a56db;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8f0fe}
+.f{margin:7px 0}
+.f label{font-size:11px;color:#667085;display:block;margin-bottom:2px;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.f input,.f textarea{width:100%;padding:6px 8px;border:1px solid #ced7e6;border-radius:6px;font-size:13px;font-family:inherit;color:#1a1a2e}
+.f textarea{resize:vertical}
+.f input:focus,.f textarea:focus{outline:none;border-color:#1a56db;box-shadow:0 0 0 2px #e8f0fe}
+.sec-label{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px;padding-top:10px;border-top:1px solid #f0f4f8}
+.btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.btns button{padding:7px 12px;border:none;background:#1a56db;color:#fff;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500}
+.btns button:hover{background:#1648c0}
+.btns button.ghost{background:#fff;border:1px solid #ced7e6;color:#374151}
+.btns button.ghost:hover{background:#f3f7ff}
+
+/* Paper */
+.paper{background:#fff;border:1px solid #dce6f0;border-radius:10px;padding:28px 32px 36px;position:relative;max-width:920px}
+.doc-title-bar{background:#1a56db;color:#fff;text-align:center;font-size:22px;font-weight:700;letter-spacing:.25em;padding:10px 0;border-radius:6px;margin-bottom:16px}
+
+/* meta: 発行日 + 請求番号 上下靠右 */
+.meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:5px;margin-bottom:16px}
+.meta-col .mitem{display:flex;align-items:center;gap:8px;font-size:13px}
+.meta-col .mitem span{color:#667085;white-space:nowrap}
+.meta-col input{border:none;border-bottom:1px solid #d1d9e6;padding:2px 4px;font-size:13px;font-family:inherit;width:130px;background:transparent;text-align:right}
+.meta-col input:focus{outline:none;border-bottom-color:#1a56db}
+
+.to-name-line{font-size:20px;font-weight:700;margin-bottom:4px;display:flex;align-items:center}
+.to-name-line input{font-size:20px;font-weight:700;border:none;border-bottom:2px solid #1a1a2e;flex:1;background:transparent;font-family:inherit}
+.to-name-line input:focus{outline:none;border-bottom-color:#1a56db}
+.to-sub input{border:none;border-bottom:1px solid #d1d9e6;font-size:13px;font-family:inherit;background:transparent;padding:1px 3px;width:100%;margin-top:5px}
+.to-sub input:focus{outline:none;border-bottom-color:#1a56db}
+.notice{font-size:13px;margin-top:12px;color:#374151}
+
+.from-block{padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;line-height:1.85}
+.from-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.from-zip{font-size:12px;color:#667085;margin-bottom:4px}
+.from-row{display:flex;gap:8px}
+.from-label{color:#667085;min-width:50px;flex-shrink:0}
+
+/* amount banner: 上下排列，左半宽，蓝色header */
+.amount-banner{border:2px solid #1a56db;border-radius:8px;overflow:hidden}
+.amount-banner .al{background:#1a56db;color:#fff;font-size:13px;font-weight:600;padding:7px 14px;text-align:center}
+.amount-banner .av{font-size:26px;font-weight:700;color:#1a1a2e;padding:10px 14px;text-align:right}
+
+.bank-date-wrap{width:50%;margin-bottom:6px}
+.bank-date-box{width:100%;border:1px solid #ccd8ec;border-radius:7px;overflow:hidden;border-collapse:separate;border-spacing:0;display:table}
+.bank-date-box .bd-row{display:table-row}
+.bank-date-box .bd-label{display:table-cell;background:#1a56db;color:#fff;font-size:12px;font-weight:600;padding:8px 14px;text-align:center;vertical-align:middle;white-space:nowrap;width:64px;border-bottom:1px solid #4a7fe8}
+.bank-date-box .bd-val{display:table-cell;padding:8px 12px;font-size:13px;white-space:pre-line;vertical-align:middle;border-bottom:1px solid #ccd8ec}
+.bank-date-box .bd-row:last-child .bd-label{border-bottom:none}
+.bank-date-box .bd-row:last-child .bd-val{border-bottom:none}
+.bank-date-box input{border:none;font-size:13px;font-family:inherit;background:transparent;width:100%}
+.bank-date-box input:focus{outline:none}
+.bank-note{font-size:12px;color:#374151;margin-bottom:14px;padding:0 2px}
+
+.items-wrap{margin-bottom:14px;overflow-x:auto}
+table.items{width:100%;border-collapse:collapse;font-size:13px}
+table.items th{background:#1a56db;color:#fff;text-align:center;font-weight:600;padding:7px 8px;border:1px solid #1648c0}
+table.items td{border:1px solid #d1d9e6;padding:5px 7px;text-align:center;vertical-align:middle}
+table.items td.tl{text-align:left}
+table.items td.tr{text-align:right}
+table.items tbody tr:hover{background:#f5f8ff}
+table.items input,table.items select{border:none;background:transparent;font-size:13px;font-family:inherit;width:100%;text-align:inherit}
+table.items input:focus,table.items select:focus{outline:none;background:#eff3ff}
+table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
+table.items .del-btn:hover{color:#c53030}
+
+.bottom-section{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;margin-bottom:14px}
+.tax-table{font-size:13px;border-collapse:collapse;min-width:200px}
+.tax-table th{background:#1a56db;color:#fff;padding:6px 12px;text-align:center;border:1px solid #1648c0}
+.tax-table td{border:1px solid #d1d9e6;padding:5px 12px;text-align:right;background:#fff}
+.tax-table td:first-child{text-align:left}
+.tax-note{font-size:12px;color:#374151;margin-bottom:5px}
+.totals-table{font-size:13px;border-collapse:collapse;margin-left:auto;min-width:200px}
+.totals-table td{border:1px solid #d1d9e6;padding:5px 14px;text-align:right}
+.totals-table td:first-child{text-align:left;background:#f8fafc;font-weight:500}
+.totals-table .highlight td{background:#1a56db;color:#fff;font-weight:700;font-size:14px;border-color:#1648c0}
+.totals-table .highlight td:first-child{text-align:left}
+
+.memo-box{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.memo-label{background:#1a56db;color:#fff;text-align:center;font-size:13px;font-weight:600;padding:5px 0}
+.memo-body{padding:10px 14px;min-height:48px}
+.memo-body input{border:none;width:100%;font-size:13px;font-family:inherit;background:transparent}
+.memo-body input:focus{outline:none}
+
+.stamp-wrap{position:absolute;right:28px;bottom:60px;cursor:grab}
+.stamp-wrap img{max-width:90px;max-height:90px;display:block}
+
+@media print{
+  .panel,.op{display:none!important}
+  body{background:#fff}
+  .layout{display:block;padding:0}
+  .paper{border:none;padding:8mm 10mm;max-width:none;box-shadow:none}
+  input,select,textarea{border:none!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;padding:0!important}
+  input[type="date"]::-webkit-calendar-picker-indicator{display:none!important}
+  .del-btn{display:none!important}
+  .stamp-wrap{cursor:default}
+  .doc-title-bar,.amount-banner .al,.bank-date-box .bd-label,.items th,.tax-table th,.totals-table .highlight td,.memo-label{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:1060px){.layout{grid-template-columns:1fr}.panel{position:static}}
+
+.from-name:empty::before{content:attr(data-ph);color:#c0c8d8;font-weight:400}
+.from-zip:empty::before{content:attr(data-ph);color:#c0c8d8}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ===== 左パネル ===== -->
+  <aside class="panel">
+    <h2>発行者情報</h2>
+    <div class="f"><label>会社名</label><input id="i_name" placeholder="●●●●株式会社"></div>
+    <div class="f"><label>郵便番号</label><input id="i_zip" placeholder="〒010-0000"></div>
+    <div class="f"><label>住所</label><input id="i_addr" placeholder="東京都○○区0-1-2 ○○ビル 1F"></div>
+    <div class="f"><label>電話</label><input id="i_tel" placeholder="00-0000-0000"></div>
+    <div class="f"><label>メール（任意）</label><input id="i_email" placeholder="info@example.com"></div>
+    <div class="f"><label>登録番号（任意）</label><input id="i_reg" placeholder="T1234567890123"></div>
+    <div class="f"><label>振込先</label><textarea id="i_bank" rows="3" placeholder="○○銀行 ○○支店 普通 1234567&#10;口座名義：○○○○"></textarea></div>
+
+    <div class="sec-label">操作</div>
+    <div class="f"><label>图影 PNG</label><input id="stamp_file" type="file" accept="image/*"></div>
+    <div class="btns">
+      <button onclick="addRow()">＋ 明細行を追加</button>
+      <button class="ghost" onclick="window.print()">🖨 印刷 / PDF</button>
+    </div>
+  </aside>
+
+  <!-- ===== 請求書本体 ===== -->
+  <section class="paper" id="paper">
+    <div class="doc-title-bar">請　求　書</div>
+
+    <!-- 発行日・請求番号：上下・右寄せ -->
+    <div class="meta-col">
+      <div class="mitem"><span>発行日</span><input id="doc_date" type="date"></div>
+      <div class="mitem"><span>請求番号</span><input id="doc_no"></div>
+    </div>
+
+    <!-- 請求先 -->
+    <div class="to-block" style="margin-bottom:18px">
+      <div style="font-size:12px;color:#667085;margin-bottom:2px">
+        <input id="to_zip" placeholder="〒100-0000" style="border:none;border-bottom:1px solid #d1d9e6;font-size:12px;font-family:inherit;background:transparent;width:110px;padding:1px 3px">
+      </div>
+      <div class="to-name-line">
+        <input id="to_name" placeholder="〇〇〇〇株式会社 御中">
+      </div>
+      <div class="to-sub">
+        <input id="to_addr" placeholder="東京都千代田区0-1-2 〇〇ビル 3F">
+      </div>
+      <div class="notice">下記の通り、ご請求申し上げます。</div>
+    </div>
+
+    <!-- 発行者 + ご請求金額：同一行、左右各半 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:18px">
+      <!-- 左：ご請求金額 -->
+      <div class="amount-banner">
+        <div class="al">ご請求金額（税込）</div>
+        <div class="av">¥<span id="v_total">0</span></div>
+      </div>
+      <!-- 右：発行者 -->
+      <div class="from-block">
+        <div class="from-name" id="v_issuer_name" data-ph="●●●●株式会社" style="min-height:1.2em"></div>
+        <div class="from-zip" id="v_issuer_zip" data-ph="〒010-0000"></div>
+        <div class="from-row"><span class="from-label">住所</span><span id="v_issuer_addr"></span></div>
+        <div class="from-row"><span class="from-label">電話</span><span id="v_issuer_tel"></span></div>
+        <div id="row_email" class="from-row" style="display:none"><span class="from-label">メール</span><span id="v_issuer_email"></span></div>
+        <div id="row_reg"   class="from-row" style="display:none"><span class="from-label">登録番号</span><span id="v_issuer_reg" style="font-size:12px"></span></div>
+      </div>
+    </div>
+
+    <div class="bank-date-wrap"><div class="bank-date-box">
+      <div class="bd-row">
+        <div class="bd-label">振込先</div>
+        <div class="bd-val" id="v_issuer_bank"></div>
+      </div>
+      <div class="bd-row">
+        <div class="bd-label">振込期日</div>
+        <div class="bd-val"><input id="due_date" type="date"></div>
+      </div>
+    </div></div>
+    <div class="bank-note">振込手数料は御社のご負担にてお願いいたします。</div>
+
+    <div class="items-wrap">
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width:82px">日付</th>
+            <th>内容</th>
+            <th style="width:44px;white-space:nowrap">軽減</th>
+            <th style="width:52px">数量</th>
+            <th style="width:44px">単位</th>
+            <th style="width:92px">単価（税抜）</th>
+            <th style="width:48px">税率</th>
+            <th style="width:92px">金額（税抜）</th>
+            <th class="op" style="width:36px"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="bottom-section">
+      <div>
+        <div class="tax-note">※は軽減税率対象です。</div>
+        <table class="tax-table">
+          <thead><tr><th>税率区分</th><th>消費税</th><th>金額（税抜）</th></tr></thead>
+          <tbody>
+            <tr><td>10%対象</td><td id="v_tax10_amt">¥0</td><td id="v_tax10_base">¥0</td></tr>
+            <tr><td>8%対象</td><td id="v_tax8_amt">¥0</td><td id="v_tax8_base">¥0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <table class="totals-table">
+          <tr><td>小計</td><td id="v_sub">¥0</td></tr>
+          <tr><td>消費税</td><td id="v_tax_sum">¥0</td></tr>
+          <tr class="highlight"><td>合計</td><td id="v_total2">¥0</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="memo-box">
+      <div class="memo-label">備　考</div>
+      <div class="memo-body"><input id="memo" placeholder="備考を入力してください"></div>
+    </div>
+
+    <div class="stamp-wrap" id="stamp_wrap"><img id="stamp_img" style="display:none"></div>
+  </section>
+</div>
+
+<script>
+const KSP   = 'stamp_pos_req_v2';
+const LSKEY = 'issuer_info_v1';
+const fmt   = n => '¥' + Number(n||0).toLocaleString('ja-JP');
+const num   = v => { const n = Number(String(v||'').replace(/,/g,'')); return Number.isFinite(n) ? n : 0; };
+const round = n => Math.round(n);
+
+function syncIssuer() {
+  v_issuer_name.textContent = i_name.value;
+  v_issuer_zip.textContent  = i_zip.value;
+  v_issuer_addr.textContent = i_addr.value;
+  v_issuer_tel.textContent  = i_tel.value;
+  v_issuer_bank.textContent = i_bank.value;
+
+  // メール：空なら行ごと非表示
+  const emailVal = i_email.value.trim();
+  v_issuer_email.textContent = emailVal;
+  row_email.style.display = emailVal ? '' : 'none';
+
+  // 登録番号：空なら行ごと非表示
+  const regVal = i_reg.value.trim();
+  v_issuer_reg.textContent = regVal;
+  row_reg.style.display = regVal ? '' : 'none';
+
+  try {
+    localStorage.setItem(LSKEY, JSON.stringify({
+      name:i_name.value, zip:i_zip.value, addr:i_addr.value,
+      tel:i_tel.value, email:i_email.value, reg:i_reg.value, bank:i_bank.value
+    }));
+  } catch(e) {}
+}
+
+function loadIssuer() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LSKEY) || '{}');
+    if (d.name)  i_name.value  = d.name;
+    if (d.zip)   i_zip.value   = d.zip;
+    if (d.addr)  i_addr.value  = d.addr;
+    if (d.tel)   i_tel.value   = d.tel;
+    if (d.email) i_email.value = d.email;
+    if (d.reg)   i_reg.value   = d.reg;
+    if (d.bank)  i_bank.value  = d.bank;
+  } catch(e) {}
+  syncIssuer();
+}
+
+[i_name, i_zip, i_addr, i_tel, i_email, i_reg, i_bank]
+  .forEach(el => el.addEventListener('input', syncIssuer));
+
+function addRow(v={}) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="dt" type="date" value="${v.date||''}"></td>
+    <td class="tl"><input class="n" value="${v.name||''}" style="width:100%;min-width:120px" placeholder="品名・内容"></td>
+    <td><select class="red"><option value="">-</option><option value="※">※</option></select></td>
+    <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}" style="width:44px;text-align:center"></td>
+    <td><input class="u" value="${v.unit||'式'}" style="width:36px;text-align:center"></td>
+    <td><input class="p" type="number" min="0" value="${v.price||0}" style="width:80px;text-align:right"></td>
+    <td><select class="t"><option value="10">10%</option><option value="8">8%</option></select></td>
+    <td class="tr b">¥0</td>
+    <td class="op"><button class="del-btn" onclick="this.closest('tr').remove();calc()" title="削除">✕</button></td>`;
+  tr.querySelector('.t').value   = String(v.tax||10);
+  tr.querySelector('.red').value = v.red||'';
+  tr.querySelectorAll('input,select').forEach(e => e.addEventListener('input', calc));
+  tbody.appendChild(tr);
+  calc();
+}
+
+function calc() {
+  let b8=0, b10=0;
+  [...tbody.querySelectorAll('tr')].forEach(tr => {
+    const q   = num(tr.querySelector('.q').value),
+          tax = Number(tr.querySelector('.t').value) === 8 ? 8 : 10,
+          p   = num(tr.querySelector('.p').value);
+    const base = (q && p) ? q * p : 0;
+    if (tax === 8) b8 += base; else b10 += base;
+    tr.querySelector('.b').textContent = fmt(base);
+  });
+  const t10=round(b10*0.10), t8=round(b8*0.08), sub=b8+b10, taxSum=t8+t10, total=sub+taxSum;
+  v_sub.textContent        = fmt(sub);
+  v_tax_sum.textContent    = fmt(taxSum);
+  v_total.textContent      = Number(total).toLocaleString('ja-JP');
+  v_total2.textContent     = fmt(total);
+  v_tax10_base.textContent = fmt(b10); v_tax10_amt.textContent = fmt(t10);
+  v_tax8_base.textContent  = fmt(b8);  v_tax8_amt.textContent  = fmt(t8);
+}
+
+function bindStamp() {
+  let d=false, sx=0, sy=0, bx=0, by=0;
+  const w=stamp_wrap, p=paper;
+  const save  = () => localStorage.setItem(KSP, JSON.stringify({x:parseFloat(w.style.left)||0,y:parseFloat(w.style.top)||0}));
+  const apply = (x,y) => {
+    const mx=Math.max(0,p.clientWidth-w.offsetWidth), my=Math.max(0,p.clientHeight-w.offsetHeight);
+    w.style.left=Math.min(Math.max(0,x),mx)+'px'; w.style.top=Math.min(Math.max(0,y),my)+'px';
+    w.style.right='auto'; w.style.bottom='auto';
+  };
+  try { const t=JSON.parse(localStorage.getItem(KSP)||'{}'); if(t.x||t.y) apply(t.x||0,t.y||0); } catch(e) {}
+  w.addEventListener('mousedown', e => { d=true; sx=e.clientX; sy=e.clientY; bx=parseFloat(w.style.left)||0; by=parseFloat(w.style.top)||0; w.style.cursor='grabbing'; });
+  window.addEventListener('mousemove', e => { if(!d) return; apply(bx+e.clientX-sx, by+e.clientY-sy); });
+  window.addEventListener('mouseup',   () => { if(!d) return; d=false; w.style.cursor='grab'; save(); });
+}
+
+stamp_file.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { stamp_img.src=r.result; stamp_img.style.display='block'; };
+  r.readAsDataURL(f);
+});
+
+(()=>{
+  const today = new Date().toISOString().slice(0,10);
+  doc_date.value = today;
+  doc_no.value   = '0000001';
+  loadIssuer();
+  bindStamp();
+})();
+</script>
+</body>
+</html>
