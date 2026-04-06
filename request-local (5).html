@@ -110,6 +110,13 @@ table.items .del-btn:hover{color:#c53030}
   .doc-title-bar,.amount-banner .al,.bank-date-box .bd-label,.items th,.tax-table th,.totals-table .highlight td,.memo-label{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 @media(max-width:1060px){.layout{grid-template-columns:1fr}.panel{position:static}}
+@media screen{
+  .pdf-mode .panel{display:none!important}
+  .pdf-mode .layout{display:block!important;padding:0!important;max-width:none!important}
+  .pdf-mode .paper{border:none!important;padding:8mm 10mm!important;max-width:none!important;box-shadow:none!important}
+  .pdf-mode input,.pdf-mode select,.pdf-mode textarea{border:none!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;padding:0!important}
+  .pdf-mode .op,.pdf-mode .del-btn{display:none!important}
+}
 
 .from-name:empty::before{content:attr(data-ph);color:#c0c8d8;font-weight:400}
 .from-zip:empty::before{content:attr(data-ph);color:#c0c8d8}
@@ -133,7 +140,7 @@ table.items .del-btn:hover{color:#c53030}
     <div class="f"><label>图影 PNG</label><input id="stamp_file" type="file" accept="image/*"></div>
     <div class="btns">
       <button onclick="addRow()">＋ 明細行を追加</button>
-      <button class="ghost" onclick="window.print()">🖨 印刷 / PDF</button>
+      <button class="ghost" onclick="onPdfClick()">🖨 印刷 / PDF</button>
     </div>
   </aside>
 
@@ -324,6 +331,21 @@ function calc() {
   v_total2.textContent     = fmt(total);
   v_tax10_base.textContent = fmt(b10); v_tax10_amt.textContent = fmt(t10);
   v_tax8_base.textContent  = fmt(b8);  v_tax8_amt.textContent  = fmt(t8);
+}
+
+function onPdfClick() {
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 1060;
+  if (!isMobile) {
+    window.print();
+    return;
+  }
+  document.body.classList.add('pdf-mode');
+  const clean = () => document.body.classList.remove('pdf-mode');
+  window.addEventListener('afterprint', clean, { once: true });
+  setTimeout(() => {
+    window.print();
+    setTimeout(clean, 1200);
+  }, 60);
 }
 
 function bindStamp() {
