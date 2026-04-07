@@ -1,4 +1,5 @@
-﻿import { json, randomCode, sha256Hex, setCookie, signToken } from '../../_lib/auth';
+﻿import { json, randomCode, sha256Hex, setCookie, signToken } from '../../_lib/auth.js';
+
 
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => ({}));
@@ -66,3 +67,4 @@ export async function onRequestPost({ request, env }) {
     },
   });
 }
+

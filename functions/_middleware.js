@@ -1,5 +1,6 @@
-﻿import { getCookie, verifySignedToken } from './_lib/auth';
-import { findSessionByRawToken } from './_lib/db';
+﻿import { getCookie, verifySignedToken } from './_lib/auth.js';
+import { findSessionByRawToken } from './_lib/db.js';
+
 
 const PASS_PAGES = new Set(['/invite.html', '/admin-enter.html']);
 
@@ -29,3 +30,4 @@ export async function onRequest(context) {
 
   return next();
 }
+

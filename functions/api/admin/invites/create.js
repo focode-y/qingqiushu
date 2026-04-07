@@ -1,5 +1,6 @@
-﻿import { json, getCookie, verifySignedToken } from '../../../_lib/auth';
-import { findSessionByRawToken, createInviteCode } from '../../../_lib/db';
+﻿import { json, getCookie, verifySignedToken } from '../../../_lib/auth.js';
+import { findSessionByRawToken, createInviteCode } from '../../../_lib/db.js';
+
 
 async function requireAdmin(request, env) {
   const signed = getCookie(request, 'access_session');
@@ -29,3 +30,4 @@ export async function onRequestPost({ request, env }) {
 
   return json({ ok: true, codes });
 }
+

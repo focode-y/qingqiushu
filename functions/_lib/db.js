@@ -1,4 +1,5 @@
-﻿import { randomCode, sha256Hex } from './auth';
+﻿import { randomCode, sha256Hex } from './auth.js';
+
 
 export async function createInviteCode(env, { maxUses = 1, expiresAt = null, note = '' } = {}) {
   for (let i = 0; i < 5; i++) {
@@ -31,3 +32,4 @@ export async function findSessionByRawToken(env, rawToken) {
   if (new Date(rs.expires_at).getTime() <= Date.now()) return null;
   return rs;
 }
+
