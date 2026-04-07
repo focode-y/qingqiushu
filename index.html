@@ -6,14 +6,23 @@
 <title>書類ナビゲーション</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+:root{
+  --theme:#1d4ed8;
+  --theme-soft:#eff6ff;
+  --theme-border:#bfdbfe;
+  --head-border:#dbe8ff;
+}
 *{box-sizing:border-box} body{margin:0;font-family:'Noto Sans JP',sans-serif;background:linear-gradient(135deg,#eef4ff,#f7fbff);color:#0f172a}
 .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-.head{background:#fff;border:1px solid #dbe8ff;border-radius:14px;padding:18px 20px;box-shadow:0 8px 24px rgba(30,64,175,.08)}
+.head{background:#fff;border:1px solid var(--head-border);border-radius:14px;padding:18px 20px;box-shadow:0 8px 24px rgba(30,64,175,.08)}
 .head h1{margin:0 0 8px;font-size:24px}.head p{margin:0;color:#475569}
 .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.tab{border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-.tab.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
-.frame{margin-top:14px;background:#fff;border:1px solid #dbe8ff;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.08)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.toolbar label{font-size:13px;color:#334155}
+.toolbar select{border:1px solid #cbd5e1;border-radius:8px;padding:6px 8px;background:#fff;font:inherit}
+.tab{border:1px solid var(--theme-border);background:var(--theme-soft);color:var(--theme);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--theme);color:#fff;border-color:var(--theme)}
+.frame{margin-top:14px;background:#fff;border:1px solid var(--head-border);border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.08)}
 iframe{width:100%;height:720px;border:0;background:#fff;overflow:hidden}
 </style>
 </head>
@@ -22,6 +31,14 @@ iframe{width:100%;height:720px;border:0;background:#fff;overflow:hidden}
     <section class="head">
       <h1>書類作成</h1>
       <p>以下から「請求書」「領収書」を切り替えて作成できます。</p>
+      <div class="toolbar">
+        <label for="themeSelect">背景色</label>
+        <select id="themeSelect">
+          <option value="blue">ブルー</option>
+          <option value="gray">グレー</option>
+          <option value="black">ブラック</option>
+        </select>
+      </div>
       <div class="nav">
         <button class="tab active" data-src="qingiushu.html">請求書</button>
         <button class="tab" data-src="ryoshushu.html">領収書</button>
@@ -36,6 +53,43 @@ iframe{width:100%;height:720px;border:0;background:#fff;overflow:hidden}
 <script>
 const frame = document.getElementById('docFrame');
 const tabs = [...document.querySelectorAll('.tab')];
+const themeSelect = document.getElementById('themeSelect');
+const THEME_KEY = 'doc_theme_v1';
+const THEMES = {
+  blue:  { theme:'#1d4ed8', soft:'#eff6ff', border:'#bfdbfe', head:'#dbe8ff' },
+  gray:  { theme:'#4b5563', soft:'#f3f4f6', border:'#d1d5db', head:'#e5e7eb' },
+  black: { theme:'#111827', soft:'#f3f4f6', border:'#d1d5db', head:'#d1d5db' }
+};
+
+function applyThemeToShell(name){
+  const t = THEMES[name] || THEMES.blue;
+  const rs = document.documentElement.style;
+  rs.setProperty('--theme', t.theme);
+  rs.setProperty('--theme-soft', t.soft);
+  rs.setProperty('--theme-border', t.border);
+  rs.setProperty('--head-border', t.head);
+}
+
+function applyThemeToDoc(name){
+  try{
+    const doc = frame.contentWindow.document;
+    let styleEl = doc.getElementById('theme-override-style');
+    if(!styleEl){
+      styleEl = doc.createElement('style');
+      styleEl.id = 'theme-override-style';
+      doc.head.appendChild(styleEl);
+    }
+    const t = THEMES[name] || THEMES.blue;
+    styleEl.textContent = `
+      .panel h2, .h2 { color: ${t.theme} !important; }
+      .doc-title-bar, .title, .amount-banner .al, .memo-label, .memo .l,
+      .tax-table th, .table th, table.items th, .totals-table .highlight td { background: ${t.theme} !important; color: #fff !important; border-color:${t.theme} !important; }
+      .amount-banner, .amount, .title { border-color: ${t.theme} !important; }
+      .btns button:not(.ghost), button:not(.ghost) { background:${t.theme} !important; border-color:${t.theme} !important; color:#fff !important; }
+    `;
+  }catch(e){}
+}
+
 function fitFrameHeight() {
   try {
     const doc = frame.contentWindow.document;
@@ -47,6 +101,7 @@ function fitFrameHeight() {
   } catch (e) {}
 }
 frame.addEventListener('load', () => {
+  applyThemeToDoc(themeSelect.value);
   fitFrameHeight();
   setTimeout(fitFrameHeight, 120);
 });
@@ -57,6 +112,15 @@ tabs.forEach(btn => {
     frame.src = btn.dataset.src;
   });
 });
+themeSelect.addEventListener('change', () => {
+  applyThemeToShell(themeSelect.value);
+  applyThemeToDoc(themeSelect.value);
+  localStorage.setItem(THEME_KEY, themeSelect.value);
+  setTimeout(fitFrameHeight, 60);
+});
+const savedTheme = localStorage.getItem(THEME_KEY) || 'blue';
+themeSelect.value = savedTheme;
+applyThemeToShell(savedTheme);
 window.addEventListener('resize', fitFrameHeight);
 </script>
 </body>
