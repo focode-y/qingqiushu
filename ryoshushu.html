@@ -6,25 +6,31 @@
 <title>領収書</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+:root{
+  --theme:#1d4ed8;
+  --theme-dark:#163ea9;
+}
+body[data-theme="gray"]{--theme:#64748b;--theme-dark:#4b5563}
+body[data-theme="black"]{--theme:#111827;--theme-dark:#030712}
 *{box-sizing:border-box} body{margin:0;background:#f1f5f9;font-family:'Noto Sans JP',sans-serif;color:#0f172a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .layout{max-width:1180px;margin:16px auto;display:grid;grid-template-columns:240px 1fr;gap:16px;padding:0 16px}
 .panel,.paper{background:#fff;border:1px solid #dbe5f1;border-radius:12px}
 .panel{padding:14px;position:sticky;top:10px;height:fit-content}
 .paper{padding:28px 30px;position:relative;max-width:900px}
-.h2{font-size:14px;font-weight:700;color:#1d4ed8;margin:0 0 10px}
+.h2{font-size:14px;font-weight:700;color:var(--theme);margin:0 0 10px}
 .f{margin:8px 0}.f label{display:block;font-size:12px;color:#475569;margin-bottom:3px}
 .f input,.f textarea,.f select{width:100%;padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
 .f textarea{resize:vertical}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-button{border:0;background:#1d4ed8;color:#fff;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+button{border:0;background:var(--theme);color:#fff;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
 button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
-.title{background:#1d4ed8;color:#fff;text-align:center;border-radius:8px;padding:8px 0;font-size:24px;font-weight:700;letter-spacing:.2em}
+.title{background:var(--theme);color:#fff;text-align:center;border-radius:8px;padding:8px 0;font-size:24px;font-weight:700;letter-spacing:.2em}
 .meta{display:flex;justify-content:flex-end;gap:16px;margin:12px 0 14px;font-size:13px}
 .meta input{border:none;border-bottom:1px solid #94a3b8;padding:2px 4px;width:140px;text-align:right}
 .to{margin:6px 0 16px}
 .to .name{font-size:22px;font-weight:700;border-bottom:2px solid #0f172a;padding-bottom:4px}
-.amount{border:2px solid #1d4ed8;border-radius:10px;overflow:hidden;margin:12px 0}
-.amount .l{background:#1d4ed8;color:#fff;text-align:center;padding:8px;font-size:13px}
+.amount{border:2px solid var(--theme);border-radius:10px;overflow:hidden;margin:12px 0}
+.amount .l{background:var(--theme);color:#fff;text-align:center;padding:8px;font-size:13px}
 .amount .v{text-align:right;font-size:34px;font-weight:700;padding:10px 14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
 .box{border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;min-height:120px}
@@ -32,14 +38,18 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
 .r{display:flex;gap:8px;font-size:13px;line-height:1.8}.k{color:#64748b;min-width:72px}
 .table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
 .table th,.table td{border:1px solid #cbd5e1;padding:7px 8px}
-.table th{background:#1d4ed8;color:#fff}
+.table th{background:var(--theme);color:#fff}
 .tr{text-align:right}
 .memo{margin-top:12px;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}
-.memo .l{background:#1d4ed8;color:#fff;padding:6px 10px;font-size:13px}
+.memo .l{background:var(--theme);color:#fff;padding:6px 10px;font-size:13px}
 .memo .b{padding:10px;min-height:48px}
-.note{margin-top:10px;font-size:12px;color:#475569}
 .stamp-wrap{position:absolute;right:28px;bottom:70px;cursor:grab}
 .stamp-wrap img{max-width:92px;max-height:92px;display:none}
+.inshi-box{
+  margin-top:12px;width:180px;min-height:130px;border:2px dotted #9ca3af;
+  color:#334155;padding:12px 10px;line-height:1.35;font-size:34px;font-weight:500;
+  letter-spacing:.02em;
+}
 @media print{.panel{display:none}.layout{display:block;padding:0}.paper{border:none;max-width:none;padding:8mm 10mm}}
 @media(max-width:980px){.layout{grid-template-columns:1fr}.panel{position:static}}
 </style>
@@ -55,6 +65,13 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
     <div class="f"><label>電話</label><input id="i_tel" placeholder="03-0000-0000"></div>
 
     <h2 class="h2" style="margin-top:12px">領収情報</h2>
+    <div class="f"><label>テーマ色</label>
+      <select id="theme_select">
+        <option value="blue">ブルー</option>
+        <option value="gray">グレー</option>
+        <option value="black">ブラック</option>
+      </select>
+    </div>
     <div class="f"><label>宛名</label><input id="to_name" placeholder="○○株式会社 御中"></div>
     <div class="f"><label>但し書き</label><input id="purpose" placeholder="サービス代として"></div>
     <div class="f"><label>税区分</label>
@@ -110,8 +127,7 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
       <div class="b" id="v_purpose">サービス代として</div>
     </div>
 
-    <div class="note">※電子領収書は法令上押印必須ではありません。印影は任意表示です。</div>
-    <div class="note">※適格請求書等保存方式で仕入税額控除に利用する場合は、登録番号・税率ごとの税額記載を推奨します。</div>
+    <div class="inshi-box">電子領収書<br>につき印紙<br>不要</div>
 
     <div class="stamp-wrap" id="stamp_wrap"><img id="stamp_img" alt="stamp"></div>
   </section>
@@ -120,6 +136,7 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
 <script>
 const LSKEY='receipt_issuer_v1';
 const KSP='stamp_pos_receipt_v1';
+const THEMEKEY='receipt_theme_v1';
 const yen=n=>'¥'+Number(n||0).toLocaleString('ja-JP');
 const n=v=>{const x=Number(v||0);return Number.isFinite(x)?x:0;};
 
@@ -153,6 +170,9 @@ function load(){
   to_name.value=d.to_name||''; purpose.value=d.purpose||''; tax_rate.value=d.tax_rate||'10'; baseEl.value=d.base||'0';
   const today=new Date().toISOString().slice(0,10);
   doc_date.value=today;
+  const th = localStorage.getItem(THEMEKEY) || 'blue';
+  theme_select.value = th;
+  applyTheme(th);
   sync();
 }
 
@@ -165,6 +185,14 @@ function resetForm(){
 
 const baseEl=document.getElementById('base');
 [i_name,i_reg,i_zip,i_addr,i_tel,to_name,purpose,tax_rate,baseEl].forEach(el=>el.addEventListener('input',sync));
+theme_select.addEventListener('change',()=>{
+  applyTheme(theme_select.value);
+  localStorage.setItem(THEMEKEY, theme_select.value);
+});
+
+function applyTheme(theme){
+  document.body.dataset.theme = theme;
+}
 
 function bindStamp(){
   let d=false,sx=0,sy=0,bx=0,by=0;
