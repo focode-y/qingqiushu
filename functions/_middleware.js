@@ -2,14 +2,16 @@
 import { findSessionByRawToken } from './_lib/db.js';
 
 
-const PASS_PAGES = new Set(['/invite.html', '/admin-enter.html']);
+const PASS_PAGES = ['/invite.html', '/admin-enter.html', '/invite.html/', '/admin-enter.html/'];
 
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   const path = url.pathname;
 
-  if (path.startsWith('/api/') || PASS_PAGES.has(path) || path === '/favicon.ico') {
+  const lower = path.toLowerCase();
+  const allow = PASS_PAGES.includes(lower) || lower.endsWith('/invite.html') || lower.endsWith('/admin-enter.html');
+  if (path.startsWith('/api/') || allow || path === '/favicon.ico') {
     return next();
   }
 
