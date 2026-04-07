@@ -37,6 +37,16 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
 .box{border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;min-height:120px}
 .issuer-box{margin:0}
 .detail-box{margin-bottom:12px}
+.items-wrap{margin-bottom:12px;overflow-x:auto}
+.items{width:100%;border-collapse:collapse;font-size:13px}
+.items th,.items td{border:1px solid #cbd5e1;padding:7px 8px}
+.items th{background:var(--theme);color:#fff;text-align:center}
+.items td{text-align:center}
+.items td.tl{text-align:left}
+.items td.tr{text-align:right}
+.items input,.items select{width:100%;border:none;background:transparent;font:inherit}
+.items input:focus,.items select:focus{outline:none;background:#eff6ff}
+.del-btn{background:none;border:none;color:#dc2626;font-size:16px;line-height:1;padding:0 4px}
 .box h3{margin:0 0 6px;font-size:14px;color:#334155}
 .r{display:flex;gap:8px;font-size:13px;line-height:1.8}.k{color:#64748b;min-width:72px}
 .table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
@@ -77,13 +87,10 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
     </div>
     <div class="f"><label>宛名</label><input id="to_name" placeholder="○○株式会社 御中"></div>
     <div class="f"><label>但し書き</label><input id="purpose" placeholder="サービス代として"></div>
-    <div class="f"><label>税区分</label>
-      <select id="tax_rate"><option value="10">10%</option><option value="8">8%</option><option value="0">非課税</option></select>
-    </div>
-    <div class="f"><label>税抜金額</label><input id="base" type="number" min="0" value="0"></div>
 
     <div class="f"><label>角印/印影（任意）</label><input id="stamp_file" type="file" accept="image/*"></div>
     <div class="btns">
+      <button type="button" onclick="addRow()">+ 明細行を追加</button>
       <button onclick="window.print()">印刷 / PDF</button>
       <button type="button" class="ghost" onclick="resetForm()">クリア</button>
     </div>
@@ -94,6 +101,7 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
     <div class="meta">
       <div>発行日 <input id="doc_date" type="date"></div>
       <div>領収書番号 <input id="doc_no" value="R-000001"></div>
+      <div>請求書番号 <input id="req_no" placeholder="INV-000001"></div>
     </div>
 
     <div class="to"><div class="name" id="v_to">○○株式会社 御中</div></div>
@@ -115,11 +123,29 @@ button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
 
     <div class="box detail-box">
       <h3>領収内訳</h3>
+      <div class="items-wrap">
+        <table class="items">
+          <thead>
+            <tr>
+              <th style="width:110px">日付</th>
+              <th>内容</th>
+              <th style="width:72px">数量</th>
+              <th style="width:72px">単位</th>
+              <th style="width:120px">単価（税抜）</th>
+              <th style="width:80px">税率</th>
+              <th style="width:130px">金額（税抜）</th>
+              <th style="width:38px"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
       <table class="table">
         <thead><tr><th>項目</th><th class="tr">金額</th></tr></thead>
         <tbody>
           <tr><td>税抜金額</td><td class="tr" id="v_base">¥0</td></tr>
-          <tr><td>消費税</td><td class="tr" id="v_tax">¥0</td></tr>
+          <tr><td>消費税（10%）</td><td class="tr" id="v_tax10">¥0</td></tr>
+          <tr><td>消費税（8%）</td><td class="tr" id="v_tax8">¥0</td></tr>
           <tr><td><strong>税込合計</strong></td><td class="tr" id="v_total2"><strong>¥0</strong></td></tr>
         </tbody>
       </table>
@@ -144,9 +170,19 @@ const yen=n=>'¥'+Number(n||0).toLocaleString('ja-JP');
 const n=v=>{const x=Number(v||0);return Number.isFinite(x)?x:0;};
 
 function sync(){
-  const base=n(baseEl.value);
-  const rate=n(tax_rate.value);
-  const tax=Math.round(base*rate/100);
+  let base8=0,base10=0;
+  [...tbody.querySelectorAll('tr')].forEach(tr=>{
+    const qty=n(tr.querySelector('.q').value);
+    const price=n(tr.querySelector('.p').value);
+    const rate=Number(tr.querySelector('.t').value)===8?8:10;
+    const rowBase=qty*price;
+    tr.querySelector('.b').textContent=yen(rowBase);
+    if(rate===8) base8+=rowBase; else base10+=rowBase;
+  });
+  const base=base8+base10;
+  const tax10=Math.round(base10*0.10);
+  const tax8=Math.round(base8*0.08);
+  const tax=tax10+tax8;
   const total=base+tax;
 
   v_name.textContent=i_name.value;
@@ -157,37 +193,39 @@ function sync(){
   v_to.textContent=to_name.value||'（宛名未入力）';
   v_purpose.textContent=purpose.value||'（但し書き未入力）';
   v_base.textContent=yen(base);
-  v_tax.textContent=yen(tax)+(rate===0?'（非課税）':'（'+rate+'%）');
+  v_tax10.textContent=yen(tax10);
+  v_tax8.textContent=yen(tax8);
   v_total.textContent=total.toLocaleString('ja-JP');
   v_total2.innerHTML='<strong>'+yen(total)+'</strong>';
 
   localStorage.setItem(LSKEY,JSON.stringify({
     i_name:i_name.value,i_reg:i_reg.value,i_zip:i_zip.value,i_addr:i_addr.value,i_tel:i_tel.value,
-    to_name:to_name.value,purpose:purpose.value,tax_rate:tax_rate.value,base:baseEl.value
+    to_name:to_name.value,purpose:purpose.value
   }));
 }
 
 function load(){
   const d=JSON.parse(localStorage.getItem(LSKEY)||'{}');
   i_name.value=d.i_name||''; i_reg.value=d.i_reg||''; i_zip.value=d.i_zip||''; i_addr.value=d.i_addr||''; i_tel.value=d.i_tel||'';
-  to_name.value=d.to_name||''; purpose.value=d.purpose||''; tax_rate.value=d.tax_rate||'10'; baseEl.value=d.base||'0';
+  to_name.value=d.to_name||''; purpose.value=d.purpose||'';
   const today=new Date().toISOString().slice(0,10);
   doc_date.value=today;
   const th = localStorage.getItem(THEMEKEY) || 'blue';
   theme_select.value = th;
   applyTheme(th);
+  if (!tbody.children.length) addRow({date:today,name:'',qty:1,unit:'式',price:0,tax:10});
   sync();
 }
 
 function resetForm(){
   localStorage.removeItem(LSKEY);
   [i_name,i_reg,i_zip,i_addr,i_tel,to_name,purpose].forEach(el=>el.value='');
-  tax_rate.value='10'; baseEl.value='0';
+  tbody.innerHTML='';
+  addRow({date:new Date().toISOString().slice(0,10),name:'',qty:1,unit:'式',price:0,tax:10});
   sync();
 }
 
-const baseEl=document.getElementById('base');
-[i_name,i_reg,i_zip,i_addr,i_tel,to_name,purpose,tax_rate,baseEl].forEach(el=>el.addEventListener('input',sync));
+[i_name,i_reg,i_zip,i_addr,i_tel,to_name,purpose].forEach(el=>el.addEventListener('input',sync));
 theme_select.addEventListener('change',()=>{
   applyTheme(theme_select.value);
   localStorage.setItem(THEMEKEY, theme_select.value);
@@ -195,6 +233,23 @@ theme_select.addEventListener('change',()=>{
 
 function applyTheme(theme){
   document.body.dataset.theme = theme;
+}
+
+function addRow(v={}){
+  const tr=document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="dt" type="date" value="${v.date||''}"></td>
+    <td class="tl"><input class="n" value="${v.name||''}" placeholder="サービス名 / 商品名"></td>
+    <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}"></td>
+    <td><input class="u" value="${v.unit||'式'}"></td>
+    <td><input class="p tr" type="number" min="0" value="${v.price||0}"></td>
+    <td><select class="t"><option value="10">10%</option><option value="8">8%</option></select></td>
+    <td class="tr b">¥0</td>
+    <td><button class="del-btn" type="button" onclick="this.closest('tr').remove();sync()">×</button></td>`;
+  tr.querySelector('.t').value=String(v.tax||10);
+  tr.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',sync));
+  tbody.appendChild(tr);
+  sync();
 }
 
 function bindStamp(){
