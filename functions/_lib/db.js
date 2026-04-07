@@ -1,7 +1,7 @@
 ﻿import { randomCode, sha256Hex } from './auth.js';
 
 export function getDB(env) {
-  return env.DB || env.D1 || env.DATABASE || env.DB_MAIN || env.db || null;
+  return env.DB || env.D1 || env.DATABASE || env.DB_MAIN || env.db || env.qingqiushu || null;
 }
 
 export async function createInviteCode(env, { maxUses = 1, expiresAt = null, note = '' } = {}) {
@@ -41,3 +41,4 @@ export async function findSessionByRawToken(env, rawToken) {
   if (new Date(rs.expires_at).getTime() <= Date.now()) return null;
   return rs;
 }
+
