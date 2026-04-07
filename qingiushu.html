@@ -152,7 +152,6 @@ table.items .del-btn:hover{color:#c53030}
     <div class="meta-col">
       <div class="mitem"><span>発行日</span><input id="doc_date" type="date"></div>
       <div class="mitem"><span>請求番号</span><input id="doc_no"></div>
-      <div class="mitem"><span>入金日</span><input id="paid_date" type="date"></div>
     </div>
 
     <!-- 請求先 -->
@@ -375,7 +374,6 @@ stamp_file.addEventListener('change', e => {
   const today = new Date().toISOString().slice(0,10);
   doc_date.value = today;
   doc_no.value   = '0000001';
-  paid_date.value = '';
   loadIssuer();
   bindStamp();
 })();

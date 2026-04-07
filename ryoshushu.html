@@ -84,6 +84,7 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
     <div class="meta-col">
       <div class="mitem"><span>発行日</span><input id="doc_date" type="date"></div>
       <div class="mitem"><span>領収番号</span><input id="doc_no"></div>
+      <div class="mitem"><span>入金日</span><input id="paid_date" type="date"></div>
     </div>
 
     <div class="to-block" style="margin-bottom:18px">
@@ -212,7 +213,7 @@ function bindStamp(){
 }
 stamp_file.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{stamp_img.src=r.result; stamp_img.style.display='block';}; r.readAsDataURL(f);});
 
-(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; loadIssuer(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
+(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
 </script>
 </body>
 </html>
