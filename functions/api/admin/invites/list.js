@@ -1,6 +1,5 @@
 ﻿import { json, getCookie, verifySignedToken } from '../../../_lib/auth.js';
-import { findSessionByRawToken } from '../../../_lib/db.js';
-
+import { findSessionByRawToken, getDB } from '../../../_lib/db.js';
 
 async function requireAdmin(request, env) {
   const signed = getCookie(request, 'access_session');
@@ -13,10 +12,13 @@ async function requireAdmin(request, env) {
 }
 
 export async function onRequestGet({ request, env }) {
+  const DB = getDB(env);
+  if (!DB) return json({ ok: false, code: 'DB_NOT_BOUND' }, 500);
+
   const admin = await requireAdmin(request, env);
   if (!admin) return json({ ok: false, code: 'NO_ADMIN' }, 403);
 
-  const rows = await env.DB.prepare(
+  const rows = await DB.prepare(
     `SELECT id, code_prefix, status, max_uses, used_count, expires_at, note, created_at
      FROM invitation_codes
      ORDER BY created_at DESC
@@ -25,4 +27,3 @@ export async function onRequestGet({ request, env }) {
 
   return json({ ok: true, items: rows.results || [] });
 }
-

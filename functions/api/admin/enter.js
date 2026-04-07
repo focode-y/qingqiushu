@@ -1,7 +1,10 @@
 ﻿import { json, randomCode, setCookie, sha256Hex, signToken } from '../../_lib/auth.js';
-
+import { getDB } from '../../_lib/db.js';
 
 export async function onRequestPost({ request, env }) {
+  const DB = getDB(env);
+  if (!DB) return json({ ok: false, code: 'DB_NOT_BOUND' }, 500);
+
   const body = await request.json().catch(() => ({}));
   const secret = String(body.secret || '');
   if (!secret || secret !== (env.ADMIN_SECRET || '')) {
@@ -15,7 +18,7 @@ export async function onRequestPost({ request, env }) {
   const ip = request.headers.get('cf-connecting-ip') || '';
   const ua = request.headers.get('user-agent') || '';
 
-  await env.DB.prepare(
+  await DB.prepare(
     `INSERT INTO access_sessions (id, token_hash, role, invite_id, issued_at, expires_at, last_seen_at, ip_first, ua_first, status)
      VALUES (?, ?, 'admin', null, ?, ?, ?, ?, ?, 'active')`
   ).bind(crypto.randomUUID(), tokenHash, nowIso, expire, nowIso, ip, ua).run();
@@ -29,4 +32,3 @@ export async function onRequestPost({ request, env }) {
     },
   });
 }
-
