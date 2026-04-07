@@ -83,7 +83,8 @@ function applyThemeToDoc(name){
     styleEl.textContent = `
       .panel h2, .h2 { color: ${t.theme} !important; }
       .doc-title-bar, .title, .amount-banner .al, .memo-label, .memo .l,
-      .tax-table th, .table th, table.items th, .totals-table .highlight td { background: ${t.theme} !important; color: #fff !important; border-color:${t.theme} !important; }
+      .tax-table th, .table th, table.items th, .totals-table .highlight td,
+      .bank-date-box .bd-label { background: ${t.theme} !important; color: #fff !important; border-color:${t.theme} !important; }
       .amount-banner, .amount, .title { border-color: ${t.theme} !important; }
       .btns button:not(.ghost), button:not(.ghost) { background:${t.theme} !important; border-color:${t.theme} !important; color:#fff !important; }
     `;
