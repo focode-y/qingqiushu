@@ -2,15 +2,29 @@
 import { findSessionByRawToken } from './_lib/db.js';
 
 
-const PASS_PAGES = ['/invite.html', '/admin-enter.html', '/invite.html/', '/admin-enter.html/'];
+const PASS_PAGES = [
+  '/invite',
+  '/invite/',
+  '/invite.html',
+  '/invite.html/',
+  '/admin-enter',
+  '/admin-enter/',
+  '/admin-enter.html',
+  '/admin-enter.html/',
+];
 
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   const path = url.pathname;
-
   const lower = path.toLowerCase();
-  const allow = PASS_PAGES.includes(lower) || lower.endsWith('/invite.html') || lower.endsWith('/admin-enter.html');
+  const staticAsset = /\.(css|js|png|jpg|jpeg|gif|svg|ico|txt|woff|woff2)$/i.test(path);
+
+  const allow = PASS_PAGES.includes(lower)
+    || lower.endsWith('/invite.html')
+    || lower.endsWith('/admin-enter.html')
+    || staticAsset;
+
   if (path.startsWith('/api/') || allow || path === '/favicon.ico') {
     return next();
   }
