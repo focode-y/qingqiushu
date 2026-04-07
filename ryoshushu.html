@@ -1,0 +1,191 @@
+﻿<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>領収書</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+*{box-sizing:border-box} body{margin:0;background:#f1f5f9;font-family:'Noto Sans JP',sans-serif;color:#0f172a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.layout{max-width:1180px;margin:16px auto;display:grid;grid-template-columns:240px 1fr;gap:16px;padding:0 16px}
+.panel,.paper{background:#fff;border:1px solid #dbe5f1;border-radius:12px}
+.panel{padding:14px;position:sticky;top:10px;height:fit-content}
+.paper{padding:28px 30px;position:relative;max-width:900px}
+.h2{font-size:14px;font-weight:700;color:#1d4ed8;margin:0 0 10px}
+.f{margin:8px 0}.f label{display:block;font-size:12px;color:#475569;margin-bottom:3px}
+.f input,.f textarea,.f select{width:100%;padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+.f textarea{resize:vertical}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{border:0;background:#1d4ed8;color:#fff;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+button.ghost{background:#fff;color:#334155;border:1px solid #cbd5e1}
+.title{background:#1d4ed8;color:#fff;text-align:center;border-radius:8px;padding:8px 0;font-size:24px;font-weight:700;letter-spacing:.2em}
+.meta{display:flex;justify-content:flex-end;gap:16px;margin:12px 0 14px;font-size:13px}
+.meta input{border:none;border-bottom:1px solid #94a3b8;padding:2px 4px;width:140px;text-align:right}
+.to{margin:6px 0 16px}
+.to .name{font-size:22px;font-weight:700;border-bottom:2px solid #0f172a;padding-bottom:4px}
+.amount{border:2px solid #1d4ed8;border-radius:10px;overflow:hidden;margin:12px 0}
+.amount .l{background:#1d4ed8;color:#fff;text-align:center;padding:8px;font-size:13px}
+.amount .v{text-align:right;font-size:34px;font-weight:700;padding:10px 14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
+.box{border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;min-height:120px}
+.box h3{margin:0 0 6px;font-size:14px;color:#334155}
+.r{display:flex;gap:8px;font-size:13px;line-height:1.8}.k{color:#64748b;min-width:72px}
+.table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.table th,.table td{border:1px solid #cbd5e1;padding:7px 8px}
+.table th{background:#1d4ed8;color:#fff}
+.tr{text-align:right}
+.memo{margin-top:12px;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}
+.memo .l{background:#1d4ed8;color:#fff;padding:6px 10px;font-size:13px}
+.memo .b{padding:10px;min-height:48px}
+.note{margin-top:10px;font-size:12px;color:#475569}
+.stamp-wrap{position:absolute;right:28px;bottom:70px;cursor:grab}
+.stamp-wrap img{max-width:92px;max-height:92px;display:none}
+@media print{.panel{display:none}.layout{display:block;padding:0}.paper{border:none;max-width:none;padding:8mm 10mm}}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.panel{position:static}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="panel">
+    <h2 class="h2">発行者情報</h2>
+    <div class="f"><label>会社名</label><input id="i_name" placeholder="株式会社サンプル"></div>
+    <div class="f"><label>登録番号（任意）</label><input id="i_reg" placeholder="T1234567890123"></div>
+    <div class="f"><label>郵便番号</label><input id="i_zip" placeholder="〒100-0000"></div>
+    <div class="f"><label>住所</label><input id="i_addr" placeholder="東京都千代田区..." ></div>
+    <div class="f"><label>電話</label><input id="i_tel" placeholder="03-0000-0000"></div>
+
+    <h2 class="h2" style="margin-top:12px">領収情報</h2>
+    <div class="f"><label>宛名</label><input id="to_name" placeholder="○○株式会社 御中"></div>
+    <div class="f"><label>但し書き</label><input id="purpose" placeholder="サービス代として"></div>
+    <div class="f"><label>税区分</label>
+      <select id="tax_rate"><option value="10">10%</option><option value="8">8%</option><option value="0">非課税</option></select>
+    </div>
+    <div class="f"><label>税抜金額</label><input id="base" type="number" min="0" value="0"></div>
+
+    <div class="f"><label>角印/印影（任意）</label><input id="stamp_file" type="file" accept="image/*"></div>
+    <div class="btns">
+      <button onclick="window.print()">印刷 / PDF</button>
+      <button type="button" class="ghost" onclick="resetForm()">クリア</button>
+    </div>
+  </aside>
+
+  <section class="paper" id="paper">
+    <div class="title">領 収 書</div>
+    <div class="meta">
+      <div>発行日 <input id="doc_date" type="date"></div>
+      <div>領収書番号 <input id="doc_no" value="R-000001"></div>
+    </div>
+
+    <div class="to"><div class="name" id="v_to">○○株式会社 御中</div></div>
+
+    <div class="amount">
+      <div class="l">領収金額（税込）</div>
+      <div class="v">¥<span id="v_total">0</span></div>
+    </div>
+
+    <div class="grid2">
+      <div class="box">
+        <h3>発行者</h3>
+        <div class="r"><span class="k">会社名</span><span id="v_name"></span></div>
+        <div class="r"><span class="k">登録番号</span><span id="v_reg"></span></div>
+        <div class="r"><span class="k">郵便番号</span><span id="v_zip"></span></div>
+        <div class="r"><span class="k">住所</span><span id="v_addr"></span></div>
+        <div class="r"><span class="k">電話</span><span id="v_tel"></span></div>
+      </div>
+      <div class="box">
+        <h3>領収内訳</h3>
+        <table class="table">
+          <thead><tr><th>項目</th><th class="tr">金額</th></tr></thead>
+          <tbody>
+            <tr><td>税抜金額</td><td class="tr" id="v_base">¥0</td></tr>
+            <tr><td>消費税</td><td class="tr" id="v_tax">¥0</td></tr>
+            <tr><td><strong>税込合計</strong></td><td class="tr" id="v_total2"><strong>¥0</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="memo">
+      <div class="l">但し書き</div>
+      <div class="b" id="v_purpose">サービス代として</div>
+    </div>
+
+    <div class="note">※電子領収書は法令上押印必須ではありません。印影は任意表示です。</div>
+    <div class="note">※適格請求書等保存方式で仕入税額控除に利用する場合は、登録番号・税率ごとの税額記載を推奨します。</div>
+
+    <div class="stamp-wrap" id="stamp_wrap"><img id="stamp_img" alt="stamp"></div>
+  </section>
+</div>
+
+<script>
+const LSKEY='receipt_issuer_v1';
+const KSP='stamp_pos_receipt_v1';
+const yen=n=>'¥'+Number(n||0).toLocaleString('ja-JP');
+const n=v=>{const x=Number(v||0);return Number.isFinite(x)?x:0;};
+
+function sync(){
+  const base=n(baseEl.value);
+  const rate=n(tax_rate.value);
+  const tax=Math.round(base*rate/100);
+  const total=base+tax;
+
+  v_name.textContent=i_name.value;
+  v_reg.textContent=i_reg.value||'（未入力）';
+  v_zip.textContent=i_zip.value;
+  v_addr.textContent=i_addr.value;
+  v_tel.textContent=i_tel.value;
+  v_to.textContent=to_name.value||'（宛名未入力）';
+  v_purpose.textContent=purpose.value||'（但し書き未入力）';
+  v_base.textContent=yen(base);
+  v_tax.textContent=yen(tax)+(rate===0?'（非課税）':'（'+rate+'%）');
+  v_total.textContent=total.toLocaleString('ja-JP');
+  v_total2.innerHTML='<strong>'+yen(total)+'</strong>';
+
+  localStorage.setItem(LSKEY,JSON.stringify({
+    i_name:i_name.value,i_reg:i_reg.value,i_zip:i_zip.value,i_addr:i_addr.value,i_tel:i_tel.value,
+    to_name:to_name.value,purpose:purpose.value,tax_rate:tax_rate.value,base:baseEl.value
+  }));
+}
+
+function load(){
+  const d=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+  i_name.value=d.i_name||''; i_reg.value=d.i_reg||''; i_zip.value=d.i_zip||''; i_addr.value=d.i_addr||''; i_tel.value=d.i_tel||'';
+  to_name.value=d.to_name||''; purpose.value=d.purpose||''; tax_rate.value=d.tax_rate||'10'; baseEl.value=d.base||'0';
+  const today=new Date().toISOString().slice(0,10);
+  doc_date.value=today;
+  sync();
+}
+
+function resetForm(){
+  localStorage.removeItem(LSKEY);
+  [i_name,i_reg,i_zip,i_addr,i_tel,to_name,purpose].forEach(el=>el.value='');
+  tax_rate.value='10'; baseEl.value='0';
+  sync();
+}
+
+const baseEl=document.getElementById('base');
+[i_name,i_reg,i_zip,i_addr,i_tel,to_name,purpose,tax_rate,baseEl].forEach(el=>el.addEventListener('input',sync));
+
+function bindStamp(){
+  let d=false,sx=0,sy=0,bx=0,by=0;
+  const w=stamp_wrap,p=paper;
+  const save=()=>localStorage.setItem(KSP,JSON.stringify({x:parseFloat(w.style.left)||0,y:parseFloat(w.style.top)||0}));
+  const apply=(x,y)=>{const mx=Math.max(0,p.clientWidth-w.offsetWidth),my=Math.max(0,p.clientHeight-w.offsetHeight);w.style.left=Math.min(Math.max(0,x),mx)+'px';w.style.top=Math.min(Math.max(0,y),my)+'px';w.style.right='auto';w.style.bottom='auto';};
+  try{const t=JSON.parse(localStorage.getItem(KSP)||'{}');if(t.x||t.y)apply(t.x||0,t.y||0);}catch(e){}
+  w.addEventListener('mousedown',e=>{d=true;sx=e.clientX;sy=e.clientY;bx=parseFloat(w.style.left)||0;by=parseFloat(w.style.top)||0;w.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{if(!d)return;apply(bx+e.clientX-sx,by+e.clientY-sy);});
+  window.addEventListener('mouseup',()=>{if(!d)return;d=false;w.style.cursor='grab';save();});
+}
+
+stamp_file.addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{stamp_img.src=r.result; stamp_img.style.display='block';};
+  r.readAsDataURL(f);
+});
+
+load();
+bindStamp();
+</script>
+</body>
+</html>
