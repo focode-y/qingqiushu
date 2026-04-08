@@ -147,9 +147,10 @@ table.items .del-btn:hover{color:#c53030}
     <div class="f">
       <label>単価入力方式</label>
       <div style="display:flex;gap:0;border:1px solid #ced7e6;border-radius:6px;overflow:hidden;margin-top:2px">
-        <button id="mode_excl" onclick="setTaxMode('excl')" style="flex:1;padding:5px 0;border:none;background:#1a56db;color:#fff;font-size:12px;font-family:inherit;cursor:pointer">税抜き</button>
-        <button id="mode_incl" onclick="setTaxMode('incl')" style="flex:1;padding:5px 0;border:none;background:#fff;color:#374151;font-size:12px;font-family:inherit;cursor:pointer;border-left:1px solid #ced7e6">税込み</button>
+        <button id="mode_excl" onclick="setTaxMode('excl')" style="flex:1;padding:5px 0;border:none;background:#1a56db;color:#fff;font-size:12px;font-family:inherit;cursor:pointer;font-weight:700">税抜き</button>
+        <button id="mode_incl" onclick="setTaxMode('incl')" style="flex:1;padding:5px 0;border:none;background:#f0f4f8;color:#aab4c4;font-size:12px;font-family:inherit;cursor:pointer;border-left:1px solid #ced7e6;font-weight:400">税込み</button>
       </div>
+      <div id="tax_mode_hint" style="font-size:11px;margin-top:4px;color:#1a56db;font-weight:600">▶ 税抜き単価を入力してください</div>
     </div>
     <div class="f"><label>图影 PNG</label><input id="stamp_file" type="file" accept="image/*"></div>
     <div class="btns">
@@ -436,10 +437,13 @@ let taxMode = 'excl'; // 'excl' = 税抜き入力, 'incl' = 税込み入力
 
 function setTaxMode(mode) {
   taxMode = mode;
-  mode_excl.style.background = mode === 'excl' ? '#1a56db' : '#fff';
-  mode_excl.style.color      = mode === 'excl' ? '#fff'    : '#374151';
-  mode_incl.style.background = mode === 'incl' ? '#1a56db' : '#fff';
-  mode_incl.style.color      = mode === 'incl' ? '#fff'    : '#374151';
+  mode_excl.style.background  = mode === 'excl' ? '#1a56db' : '#f0f4f8';
+  mode_excl.style.color       = mode === 'excl' ? '#fff'    : '#aab4c4';
+  mode_excl.style.fontWeight  = mode === 'excl' ? '700'     : '400';
+  mode_incl.style.background  = mode === 'incl' ? '#1a56db' : '#f0f4f8';
+  mode_incl.style.color       = mode === 'incl' ? '#fff'    : '#aab4c4';
+  mode_incl.style.fontWeight  = mode === 'incl' ? '700'     : '400';
+  tax_mode_hint.textContent   = mode === 'incl' ? '▶ 税込み単価を入力してください' : '▶ 税抜き単価を入力してください';
   th_price.textContent  = mode === 'incl' ? '単価（税込）' : '単価（税抜）';
   th_amount.textContent = '金額（税抜）';
   calc();
