@@ -144,6 +144,13 @@ table.items .del-btn:hover{color:#c53030}
     <div class="f"><label>振込先</label><textarea id="i_bank" rows="3" placeholder="○○銀行 ○○支店 普通 1234567&#10;口座名義：○○○○"></textarea></div>
 
     <div class="sec-label">操作</div>
+    <div class="f">
+      <label>単価入力方式</label>
+      <div style="display:flex;gap:0;border:1px solid #ced7e6;border-radius:6px;overflow:hidden;margin-top:2px">
+        <button id="mode_excl" onclick="setTaxMode('excl')" style="flex:1;padding:5px 0;border:none;background:#1a56db;color:#fff;font-size:12px;font-family:inherit;cursor:pointer">税抜き</button>
+        <button id="mode_incl" onclick="setTaxMode('incl')" style="flex:1;padding:5px 0;border:none;background:#fff;color:#374151;font-size:12px;font-family:inherit;cursor:pointer;border-left:1px solid #ced7e6">税込み</button>
+      </div>
+    </div>
     <div class="f"><label>图影 PNG</label><input id="stamp_file" type="file" accept="image/*"></div>
     <div class="btns">
       <button onclick="addRow()">＋ 明細行を追加</button>
@@ -213,9 +220,9 @@ table.items .del-btn:hover{color:#c53030}
             <th>内容</th>
             <th style="width:52px">数量</th>
             <th style="width:44px">単位</th>
-            <th style="width:92px">単価（税抜）</th>
+            <th style="width:92px" id="th_price">単価（税抜）</th>
             <th style="width:48px">税率</th>
-            <th style="width:92px">金額（税抜）</th>
+            <th style="width:92px" id="th_amount">金額（税抜）</th>
             <th class="op" style="width:36px"></th>
           </tr>
         </thead>
@@ -425,13 +432,34 @@ function addRow(v={}) {
   calc();
 }
 
+let taxMode = 'excl'; // 'excl' = 税抜き入力, 'incl' = 税込み入力
+
+function setTaxMode(mode) {
+  taxMode = mode;
+  mode_excl.style.background = mode === 'excl' ? '#1a56db' : '#fff';
+  mode_excl.style.color      = mode === 'excl' ? '#fff'    : '#374151';
+  mode_incl.style.background = mode === 'incl' ? '#1a56db' : '#fff';
+  mode_incl.style.color      = mode === 'incl' ? '#fff'    : '#374151';
+  th_price.textContent  = mode === 'incl' ? '単価（税込）' : '単価（税抜）';
+  th_amount.textContent = mode === 'incl' ? '金額（税込→税抜）' : '金額（税抜）';
+  calc();
+}
+
 function calc() {
   let b8=0, b10=0;
   [...tbody.querySelectorAll('tr')].forEach(tr => {
     const q   = num(tr.querySelector('.q').value),
           tax = Number(tr.querySelector('.t').value) === 8 ? 8 : 10,
           p   = num(tr.querySelector('.p').value);
-    const base = (q && p) ? q * p : 0;
+    let base = 0;
+    if (q && p) {
+      if (taxMode === 'incl') {
+        // 税込入力 → 反算税抜
+        base = round((q * p) / (1 + tax / 100));
+      } else {
+        base = q * p;
+      }
+    }
     if (tax === 8) b8 += base; else b10 += base;
     tr.querySelector('.b').textContent = fmt(base);
   });
