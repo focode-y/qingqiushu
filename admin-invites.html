@@ -9,11 +9,30 @@ body{margin:0;background:#f3f6fb;font-family:"Noto Sans JP",sans-serif;color:#0f
 .card{background:#fff;border:1px solid #dbe7ff;border-radius:14px;padding:16px;box-shadow:0 10px 24px rgba(15,23,42,.08)}
 h1{margin:0 0 12px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
 label{font-size:12px;color:#475569;display:block;margin-bottom:4px}
-input{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px}
-button{padding:8px 12px;border:none;border-radius:8px;background:#1d4ed8;color:#fff;cursor:pointer}
+input{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;min-height:40px}
+button{padding:8px 12px;border:none;border-radius:8px;background:#1d4ed8;color:#fff;cursor:pointer;min-height:40px}
 button.gray{background:#6b7280}
 pre{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;white-space:pre-wrap}
+.table-wrap{overflow:auto}
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}th,td{border:1px solid #dbe5f1;padding:8px}th{background:#eff6ff}
+.mobile-list{display:none}
+.m-card{background:#f8fbff;border:1px solid #dbe7ff;border-radius:12px;padding:10px;margin-top:10px}
+.m-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.m-code{font-weight:700;color:#1e3a8a}
+.m-status{font-size:12px;padding:2px 8px;border-radius:999px;background:#e5e7eb;color:#334155}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:13px}
+.m-label{color:#64748b;font-size:12px}
+.m-row{word-break:break-word}
+@media (max-width: 820px){
+  .wrap{margin:14px auto;padding:0 10px}
+  .card{padding:12px}
+  h1{font-size:28px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row > div{min-width:0}
+  .row button{width:100%}
+  .table-wrap{display:none}
+  .mobile-list{display:block}
+}
 </style>
 </head>
 <body>
@@ -33,24 +52,47 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}th,td{b
     <pre id="out">(暂无)</pre>
 
     <h3>邀请码列表</h3>
-    <table>
-      <thead><tr><th>ID</th><th>前缀</th><th>状态</th><th>次数</th><th>过期</th><th>备注</th><th>操作</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>前缀</th><th>状态</th><th>次数</th><th>过期</th><th>备注</th><th>操作</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="mobileList" class="mobile-list"></div>
   </div>
 </div>
 <script>
 const tbody=document.getElementById('tbody');
+const mobileList=document.getElementById('mobileList');
 async function load(){
   const r=await fetch('/api/admin/invites/list');
   const j=await r.json();
   if(!j.ok){location.href='/admin-enter.html';return;}
   tbody.innerHTML='';
+  mobileList.innerHTML='';
   j.items.forEach(x=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${x.id}</td><td>${x.code_prefix||''}</td><td>${x.status}</td><td>${x.used_count}/${x.max_uses}</td><td>${x.expires_at||''}</td><td>${x.note||''}</td><td><button data-id="${x.id}">禁用</button></td>`;
     tr.querySelector('button').onclick=async()=>{await fetch('/api/admin/invites/disable',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:x.id})});load();};
     tbody.appendChild(tr);
+
+    const card=document.createElement('div');
+    card.className='m-card';
+    card.innerHTML=`
+      <div class="m-top">
+        <div class="m-code">${x.code_prefix||'(无前缀)'}</div>
+        <div class="m-status">${x.status}</div>
+      </div>
+      <div class="m-grid">
+        <div class="m-row"><div class="m-label">次数</div><div>${x.used_count}/${x.max_uses}</div></div>
+        <div class="m-row"><div class="m-label">过期</div><div>${x.expires_at||''}</div></div>
+        <div class="m-row"><div class="m-label">备注</div><div>${x.note||''}</div></div>
+        <div class="m-row"><div class="m-label">ID</div><div>${x.id}</div></div>
+      </div>
+      <div style="margin-top:8px"><button data-mid="${x.id}" style="width:100%">禁用</button></div>
+    `;
+    card.querySelector('button').onclick=async()=>{await fetch('/api/admin/invites/disable',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:x.id})});load();};
+    mobileList.appendChild(card);
   });
 }
 document.getElementById('create').onclick=async()=>{
