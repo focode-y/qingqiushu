@@ -34,9 +34,12 @@ iframe{width:100%;height:720px;border:0;background:#fff;overflow:hidden}
       <div class="toolbar">
         <label for="themeSelect">背景色</label>
         <select id="themeSelect">
-          <option value="blue">ブルー</option>
-          <option value="gray">グレー</option>
-          <option value="black">ブラック</option>
+          <option value="blue">蓝色</option>
+          <option value="gray">灰色</option>
+          <option value="black">黑色</option>
+          <option value="green">墨绿</option>
+          <option value="wine">酒红</option>
+          <option value="brown">棕金</option>
         </select>
       </div>
       <div class="nav">
@@ -58,7 +61,10 @@ const THEME_KEY = 'doc_theme_v1';
 const THEMES = {
   blue:  { theme:'#1d4ed8', soft:'#eff6ff', border:'#bfdbfe', head:'#dbe8ff' },
   gray:  { theme:'#4b5563', soft:'#f3f4f6', border:'#d1d5db', head:'#e5e7eb' },
-  black: { theme:'#111827', soft:'#f3f4f6', border:'#d1d5db', head:'#d1d5db' }
+  black: { theme:'#111827', soft:'#f3f4f6', border:'#d1d5db', head:'#d1d5db' },
+  green: { theme:'#166534', soft:'#ecfdf5', border:'#bbf7d0', head:'#dcfce7' },
+  wine:  { theme:'#7f1d1d', soft:'#fef2f2', border:'#fecaca', head:'#fee2e2' },
+  brown: { theme:'#92400e', soft:'#fffbeb', border:'#fde68a', head:'#fef3c7' }
 };
 
 function applyThemeToShell(name){
