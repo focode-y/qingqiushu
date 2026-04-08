@@ -110,6 +110,7 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
     </div>
 
     <div class="items-wrap">
+      <datalist id="item-categories"></datalist>
       <table class="items">
         <thead>
           <tr>
@@ -159,6 +160,8 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
 <script>
 const KSP='stamp_pos_receipt_v4';
 const LSKEY='issuer_info_receipt_v4';
+const CATEGORY_KEY='item_categories_v1';
+const DEFAULT_CATEGORIES=['事務机椅子','ソファ'];
 const fmt=n=>'¥'+Number(n||0).toLocaleString('ja-JP');
 const num=v=>{const n=Number(String(v||'').replace(/,/g,''));return Number.isFinite(n)?n:0;};
 const round=n=>Math.round(n);
@@ -180,10 +183,25 @@ function loadIssuer(){
 }
 [i_name,i_zip,i_addr,i_tel,i_email,i_reg].forEach(el=>el.addEventListener('input',syncIssuer));
 
+function loadCategories(){
+  try{
+    const arr=JSON.parse(localStorage.getItem(CATEGORY_KEY)||'[]');
+    if(Array.isArray(arr)&&arr.length){
+      return [...new Set(arr.map(x=>String(x||'').trim()).filter(Boolean))];
+    }
+  }catch(e){}
+  return [...DEFAULT_CATEGORIES];
+}
+
+function renderCategoryDatalist(){
+  const dl=document.getElementById('item-categories');
+  dl.innerHTML=loadCategories().map(x=>`<option value="${x.replace(/"/g,'&quot;')}"></option>`).join('');
+}
+
 function addRow(v={}){
   const tr=document.createElement('tr');
   tr.innerHTML=`<td><input class="dt" type="date" value="${v.date||''}"></td>
-  <td class="tl"><input class="n" value="${v.name||''}" placeholder="品名・内容"></td>
+  <td class="tl"><input class="n" list="item-categories" value="${v.name||''}" placeholder="品名・内容"></td>
   <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}"></td>
   <td><input class="u" value="${v.unit||'式'}"></td>
   <td><input class="p" type="number" min="0" value="${v.price||0}"></td>
@@ -213,7 +231,9 @@ function bindStamp(){
 }
 stamp_file.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{stamp_img.src=r.result; stamp_img.style.display='block';}; r.readAsDataURL(f);});
 
-(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
+window.addEventListener('storage', e=>{ if(e.key===CATEGORY_KEY) renderCategoryDatalist(); });
+
+(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer(); renderCategoryDatalist(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
 </script>
 </body>
 </html>

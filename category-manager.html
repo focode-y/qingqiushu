@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>类目管理</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+*{box-sizing:border-box}
+body{margin:0;background:#f0f4f8;color:#0f172a;font-family:'Noto Sans JP',sans-serif}
+.wrap{max-width:920px;margin:16px auto;padding:0 16px}
+.card{background:#fff;border:1px solid #dce6f0;border-radius:12px;padding:16px}
+h1{margin:0 0 8px;font-size:24px}
+p{margin:0 0 14px;color:#475569}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:220px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font:inherit}
+button{border:none;background:#1d4ed8;color:#fff;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+button.ghost{background:#fff;border:1px solid #cbd5e1;color:#1f2937}
+table{width:100%;border-collapse:collapse;margin-top:14px}
+th,td{border:1px solid #dbe3ef;padding:8px 10px;text-align:left}
+th{background:#eff6ff}
+.muted{color:#64748b;font-size:13px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <h1>常用品名管理</h1>
+      <p>这里维护常用类目，請求書/領収書 的品名输入框可直接下拉选择，也可继续手动输入。</p>
+      <div class="row">
+        <input id="nameInput" type="text" placeholder="例如：事務机椅子">
+        <button id="addBtn">新增</button>
+        <button id="resetBtn" class="ghost">恢复默认</button>
+      </div>
+      <table>
+        <thead><tr><th style="width:72px">序号</th><th>品名</th><th style="width:90px">操作</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="muted" style="margin-top:10px">默认类目：事務机椅子、ソファ。</div>
+    </section>
+  </div>
+<script>
+const KEY = 'item_categories_v1';
+const DEFAULTS = ['事務机椅子','ソファ'];
+const tbody = document.getElementById('tbody');
+const nameInput = document.getElementById('nameInput');
+
+function loadCategories(){
+  try{
+    const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if(Array.isArray(arr) && arr.length){
+      return [...new Set(arr.map(x => String(x || '').trim()).filter(Boolean))];
+    }
+  }catch(e){}
+  return [...DEFAULTS];
+}
+
+function saveCategories(list){
+  localStorage.setItem(KEY, JSON.stringify(list));
+}
+
+function render(){
+  const list = loadCategories();
+  tbody.innerHTML = '';
+  list.forEach((name, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${idx + 1}</td><td>${name}</td><td><button class="ghost">删除</button></td>`;
+    tr.querySelector('button').onclick = () => {
+      const next = loadCategories().filter(x => x !== name);
+      saveCategories(next.length ? next : [...DEFAULTS]);
+      render();
+    };
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('addBtn').onclick = () => {
+  const value = nameInput.value.trim();
+  if(!value) return;
+  const list = loadCategories();
+  if(!list.includes(value)){
+    list.push(value);
+    saveCategories(list);
+  }
+  nameInput.value = '';
+  render();
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  saveCategories([...DEFAULTS]);
+  render();
+};
+
+nameInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    document.getElementById('addBtn').click();
+  }
+});
+
+render();
+</script>
+</body>
+</html>

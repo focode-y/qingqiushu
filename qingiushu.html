@@ -199,6 +199,7 @@ table.items .del-btn:hover{color:#c53030}
     <div class="bank-note">振込手数料は御社のご負担にてお願いいたします。</div>
 
     <div class="items-wrap">
+      <datalist id="item-categories"></datalist>
       <table class="items">
         <thead>
           <tr>
@@ -249,6 +250,8 @@ table.items .del-btn:hover{color:#c53030}
 <script>
 const KSP   = 'stamp_pos_req_v2';
 const LSKEY = 'issuer_info_v1';
+const CATEGORY_KEY = 'item_categories_v1';
+const DEFAULT_CATEGORIES = ['事務机椅子','ソファ'];
 const fmt   = n => '¥' + Number(n||0).toLocaleString('ja-JP');
 const num   = v => { const n = Number(String(v||'').replace(/,/g,'')); return Number.isFinite(n) ? n : 0; };
 const round = n => Math.round(n);
@@ -295,11 +298,26 @@ function loadIssuer() {
 [i_name, i_zip, i_addr, i_tel, i_email, i_reg, i_bank]
   .forEach(el => el.addEventListener('input', syncIssuer));
 
+function loadCategories() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(CATEGORY_KEY) || '[]');
+    if (Array.isArray(arr) && arr.length) {
+      return [...new Set(arr.map(x => String(x || '').trim()).filter(Boolean))];
+    }
+  } catch(e) {}
+  return [...DEFAULT_CATEGORIES];
+}
+
+function renderCategoryDatalist() {
+  const dl = document.getElementById('item-categories');
+  dl.innerHTML = loadCategories().map(x => `<option value="${x.replace(/"/g, '&quot;')}"></option>`).join('');
+}
+
 function addRow(v={}) {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td><input class="dt" type="date" value="${v.date||''}"></td>
-    <td class="tl"><input class="n" value="${v.name||''}" style="width:100%;min-width:120px" placeholder="品名・内容"></td>
+    <td class="tl"><input class="n" list="item-categories" value="${v.name||''}" style="width:100%;min-width:120px" placeholder="品名・内容"></td>
     <td><select class="red"><option value="">-</option><option value="※">※</option></select></td>
     <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}" style="width:44px;text-align:center"></td>
     <td><input class="u" value="${v.unit||'式'}" style="width:36px;text-align:center"></td>
@@ -370,11 +388,16 @@ stamp_file.addEventListener('change', e => {
   r.readAsDataURL(f);
 });
 
+window.addEventListener('storage', e => {
+  if (e.key === CATEGORY_KEY) renderCategoryDatalist();
+});
+
 (()=>{
   const today = new Date().toISOString().slice(0,10);
   doc_date.value = today;
   doc_no.value   = '0000001';
   loadIssuer();
+  renderCategoryDatalist();
   bindStamp();
 })();
 </script>
