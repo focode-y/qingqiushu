@@ -58,6 +58,13 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
 .stamp-wrap{position:absolute;right:28px;bottom:60px;cursor:grab}.stamp-wrap img{max-width:90px;max-height:90px;display:block}
 @media print{.panel,.op{display:none!important}body{background:#fff}.layout{display:block;padding:0}.paper{border:none;padding:8mm 10mm;max-width:none;box-shadow:none}}
 @media(max-width:1060px){.layout{grid-template-columns:1fr}.panel{position:static}}
+#item-dd{display:none;position:fixed;background:#fff;border:1px solid #ced7e6;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:9999;max-height:300px;overflow-y:auto;min-width:260px}
+.name-opt{padding:7px 12px;cursor:pointer;border-bottom:1px solid #f0f4f8}
+.name-opt:last-child{border-bottom:none}
+.name-opt:hover,.name-opt.active{background:#f0f4ff}
+.opt-ja{font-size:13px;color:#1a1a2e;font-weight:500}
+.opt-meta{font-size:11px;color:#9ca3af;margin-top:2px;display:flex;align-items:center;gap:5px}
+.opt-cat{background:#e8f0fe;color:#1a56db;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600}
 </style>
 </head>
 <body>
@@ -110,7 +117,6 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
     </div>
 
     <div class="items-wrap">
-      <datalist id="item-categories"></datalist>
       <table class="items">
         <thead>
           <tr>
@@ -160,8 +166,56 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
 <script>
 const KSP='stamp_pos_receipt_v4';
 const LSKEY='issuer_info_receipt_v4';
-const CATEGORY_KEY='item_categories_v1';
-const DEFAULT_CATEGORIES=['事務机椅子','ソファ'];
+const ITEMS_KEY = 'item_names_v2';
+const DEFAULT_ITEMS = [
+  {cat:"家具",zh:"二手沙发",ja:"中古ソファ"},
+  {cat:"家具",zh:"二手餐桌",ja:"中古ダイニングテーブル"},
+  {cat:"家具",zh:"二手椅子",ja:"中古椅子"},
+  {cat:"家具",zh:"二手床架",ja:"中古ベッドフレーム"},
+  {cat:"家具",zh:"二手床垫",ja:"中古マットレス"},
+  {cat:"家具",zh:"二手衣柜",ja:"中古ワードローブ／洋服タンス"},
+  {cat:"家具",zh:"二手书柜",ja:"中古本棚"},
+  {cat:"家具",zh:"二手电视柜",ja:"中古テレビボード"},
+  {cat:"家具",zh:"二手茶几",ja:"中古センターテーブル"},
+  {cat:"家具",zh:"二手办公桌",ja:"中古デスク"},
+  {cat:"家具",zh:"二手鞋柜",ja:"中古シューズボックス"},
+  {cat:"家具",zh:"二手收纳柜",ja:"中古収納棚"},
+  {cat:"家具",zh:"二手梳妆台",ja:"中古ドレッサー"},
+  {cat:"家电",zh:"二手冰箱",ja:"中古冷蔵庫"},
+  {cat:"家电",zh:"二手洗衣机",ja:"中古洗濯機"},
+  {cat:"家电",zh:"二手微波炉",ja:"中古電子レンジ"},
+  {cat:"家电",zh:"二手烤箱",ja:"中古オーブン"},
+  {cat:"家电",zh:"二手电饭锅",ja:"中古炊飯器"},
+  {cat:"家电",zh:"二手电视机",ja:"中古テレビ"},
+  {cat:"家电",zh:"二手吸尘器",ja:"中古掃除機"},
+  {cat:"家电",zh:"二手热水壶",ja:"中古電気ケトル"},
+  {cat:"家电",zh:"二手加湿器",ja:"中古加湿器"},
+  {cat:"家电",zh:"二手空气净化器",ja:"中古空気清浄機"},
+  {cat:"家电",zh:"二手暖风机",ja:"中古ファンヒーター"},
+  {cat:"家电",zh:"二手电风扇",ja:"中古扇風機"},
+  {cat:"家电",zh:"二手洗碗机",ja:"中古食器洗い乾燥機"},
+  {cat:"家电",zh:"二手干衣机",ja:"中古乾燥機"},
+  {cat:"空调",zh:"二手空调（室内机）",ja:"中古エアコン（室内機）"},
+  {cat:"空调",zh:"二手空调（室外机）",ja:"中古エアコン（室外機）"},
+  {cat:"空调",zh:"二手空调（内外机套装）",ja:"中古エアコン一式"},
+  {cat:"空调",zh:"空调安装费",ja:"エアコン取付工事費"},
+  {cat:"空调",zh:"空调拆卸费",ja:"エアコン取外し工事費"},
+  {cat:"空调",zh:"空调搬运费",ja:"エアコン運搬費"},
+  {cat:"自行车",zh:"二手自行车",ja:"中古自転車"},
+  {cat:"自行车",zh:"二手电动自行车",ja:"中古電動アシスト自転車"},
+  {cat:"自行车",zh:"二手儿童自行车",ja:"中古子ども用自転車"},
+  {cat:"自行车",zh:"二手折叠自行车",ja:"中古折りたたみ自転車"},
+  {cat:"自行车",zh:"二手山地车",ja:"中古マウンテンバイク"},
+  {cat:"自行车",zh:"自行车修理费",ja:"自転車修理費"},
+  {cat:"自行车",zh:"自行车配件",ja:"自転車部品"},
+  {cat:"其他",zh:"搬运费",ja:"運搬費"},
+  {cat:"其他",zh:"配送费",ja:"配送料"},
+  {cat:"其他",zh:"上楼费",ja:"階段搬入費"},
+  {cat:"其他",zh:"处理费",ja:"処分費"},
+  {cat:"其他",zh:"清洁费",ja:"クリーニング費"},
+  {cat:"其他",zh:"修理费",ja:"修理費"},
+  {cat:"其他",zh:"手续费",ja:"手数料"},
+];
 const fmt=n=>'¥'+Number(n||0).toLocaleString('ja-JP');
 const num=v=>{const n=Number(String(v||'').replace(/,/g,''));return Number.isFinite(n)?n:0;};
 const round=n=>Math.round(n);
@@ -183,31 +237,74 @@ function loadIssuer(){
 }
 [i_name,i_zip,i_addr,i_tel,i_email,i_reg].forEach(el=>el.addEventListener('input',syncIssuer));
 
-function loadCategories(){
-  try{
-    const arr=JSON.parse(localStorage.getItem(CATEGORY_KEY)||'[]');
-    if(Array.isArray(arr)&&arr.length){
-      return [...new Set(arr.map(x=>String(x||'').trim()).filter(Boolean))];
-    }
-  }catch(e){}
-  return [...DEFAULT_CATEGORIES];
+function loadItems() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(ITEMS_KEY) || 'null');
+    if (Array.isArray(arr) && arr.length) return arr;
+  } catch(e) {}
+  try { localStorage.setItem(ITEMS_KEY, JSON.stringify(DEFAULT_ITEMS)); } catch(e) {}
+  return DEFAULT_ITEMS;
 }
 
-function renderCategoryDatalist(){
-  const dl=document.getElementById('item-categories');
-  dl.innerHTML=loadCategories().map(x=>`<option value="${x.replace(/"/g,'&quot;')}"></option>`).join('');
-}
+(function(){
+  const dd = document.createElement('div');
+  dd.id = 'item-dd';
+  document.body.appendChild(dd);
+  let cur = null;
+  function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function show(input) {
+    cur = input;
+    const q = input.value.trim().toLowerCase();
+    const list = loadItems().filter(it => !q || it.ja.toLowerCase().includes(q) || it.zh.includes(q));
+    if (!list.length) { dd.style.display='none'; return; }
+    dd.innerHTML = list.map(it =>
+      `<div class="name-opt" data-ja="${escH(it.ja)}">` +
+      `<div class="opt-ja">${escH(it.ja)}</div>` +
+      `<div class="opt-meta">${escH(it.zh)}<span class="opt-cat">${escH(it.cat)}</span></div>` +
+      `</div>`).join('');
+    dd.querySelectorAll('.name-opt').forEach(el =>
+      el.addEventListener('mousedown', e => {
+        e.preventDefault();
+        if (cur) { cur.value = el.dataset.ja; cur.dispatchEvent(new Event('input')); }
+        dd.style.display = 'none';
+      })
+    );
+    const r = input.getBoundingClientRect();
+    dd.style.left = r.left + 'px';
+    dd.style.top  = (r.bottom + 2) + 'px';
+    dd.style.width = Math.max(r.width, 260) + 'px';
+    dd.style.display = 'block';
+  }
+  function hide() { dd.style.display='none'; cur=null; }
+  window.attachItemDropdown = function(input) {
+    input.removeAttribute('list');
+    input.setAttribute('autocomplete','off');
+    input.addEventListener('focus',   () => show(input));
+    input.addEventListener('input',   () => show(input));
+    input.addEventListener('blur',    () => setTimeout(hide, 160));
+    input.addEventListener('keydown', e => {
+      if (dd.style.display==='none') return;
+      const opts=[...dd.querySelectorAll('.name-opt')], sel=dd.querySelector('.name-opt.active'), idx=sel?opts.indexOf(sel):-1;
+      if (!opts.length) return;
+      if (e.key==='ArrowDown'){ e.preventDefault(); sel&&sel.classList.remove('active'); opts[(idx+1)%opts.length].classList.add('active'); dd.querySelector('.active').scrollIntoView({block:'nearest'}); }
+      else if (e.key==='ArrowUp'){ e.preventDefault(); sel&&sel.classList.remove('active'); opts[idx<=0?opts.length-1:idx-1].classList.add('active'); dd.querySelector('.active').scrollIntoView({block:'nearest'}); }
+      else if (e.key==='Enter'&&sel){ e.preventDefault(); input.value=sel.dataset.ja; input.dispatchEvent(new Event('input')); hide(); }
+      else if (e.key==='Escape') hide();
+    });
+  };
+})();
 
 function addRow(v={}){
   const tr=document.createElement('tr');
   tr.innerHTML=`<td><input class="dt" type="date" value="${v.date||''}"></td>
-  <td class="tl"><input class="n" list="item-categories" value="${v.name||''}" placeholder="品名・内容"></td>
+  <td class="tl"><input class="n" autocomplete="off" value="${v.name||''}" placeholder="品名・内容"></td>
   <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}"></td>
   <td><input class="u" value="${v.unit||'式'}"></td>
   <td><input class="p" type="number" min="0" value="${v.price||0}"></td>
   <td><select class="t"><option value="10">10%</option><option value="8">8%</option></select></td>
   <td class="tr b">¥0</td>
   <td class="op"><button class="del-btn" onclick="this.closest('tr').remove();calc()">×</button></td>`;
+  attachItemDropdown(tr.querySelector('.n'));
   tr.querySelector('.t').value=String(v.tax||10);
   tr.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calc));
   tbody.appendChild(tr); calc();
@@ -231,9 +328,8 @@ function bindStamp(){
 }
 stamp_file.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{stamp_img.src=r.result; stamp_img.style.display='block';}; r.readAsDataURL(f);});
 
-window.addEventListener('storage', e=>{ if(e.key===CATEGORY_KEY) renderCategoryDatalist(); });
 
-(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer(); renderCategoryDatalist(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
+(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
 </script>
 </body>
 </html>
