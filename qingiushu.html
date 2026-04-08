@@ -9,6 +9,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f0f4f8;font-family:'Noto Sans JP','Meiryo',sans-serif;color:#1a1a2e;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mobile-tools{display:none}
 
 .layout{display:grid;grid-template-columns:210px 1fr;gap:16px;padding:16px;max-width:1280px;margin:0 auto}
 .panel{background:#fff;border:1px solid #dce6f0;border-radius:10px;padding:14px;position:sticky;top:12px;height:fit-content;max-height:calc(100vh - 24px);overflow-y:auto}
@@ -140,6 +141,7 @@ table.items .del-btn:hover{color:#c53030}
 </style>
 </head>
 <body>
+<div class="mobile-tools"><button id="togglePanelBtn" type="button">显示编辑面板</button></div>
 <div class="layout">
 
   <!-- ===== 左パネル ===== -->
@@ -393,7 +395,21 @@ stamp_file.addEventListener('change', e => {
   doc_no.value   = '0000001';
   loadIssuer();
   bindStamp();
+  const isMobile = window.matchMedia('(max-width: 820px)').matches;
+  if (isMobile) document.body.classList.add('mobile-collapsed');
+  const btn = document.getElementById('togglePanelBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('mobile-collapsed');
+      btn.textContent = document.body.classList.contains('mobile-collapsed') ? '显示编辑面板' : '隐藏编辑面板';
+    });
+  }
 })();
 </script>
 </body>
 </html>
+  .mobile-tools{display:flex;justify-content:flex-end;margin-bottom:8px}
+  .mobile-tools button{border:none;background:#1a56db;color:#fff;border-radius:8px;padding:8px 10px;font-size:13px;min-height:38px}
+  body.mobile-collapsed .panel{display:none}
+  body.mobile-collapsed .layout{grid-template-columns:1fr}
+  body.mobile-collapsed .paper{margin-top:0}
