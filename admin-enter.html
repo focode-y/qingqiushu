@@ -1,24 +1,41 @@
 ﻿<!doctype html>
-<html lang="ja">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>管理员入口</title>
 <style>
-body{margin:0;background:#f3f6fb;font-family:"Noto Sans JP",sans-serif;color:#0f172a}
-.wrap{max-width:460px;margin:12vh auto;background:#fff;border:1px solid #dbe7ff;border-radius:14px;padding:22px;box-shadow:0 10px 24px rgba(15,23,42,.08)}
-h1{font-size:22px;margin:0 0 8px}p{margin:0 0 16px;color:#475569}
-input{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}
-button{margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;background:#111827;color:#fff;font:inherit;cursor:pointer}
-#msg{margin-top:12px;font-size:13px}
+:root{--c:#111827;--bg:#eef4ff;--line:#dbe7ff;--text:#0f172a;--muted:#475569}
+*{box-sizing:border-box} body{margin:0;font-family:"Noto Sans JP","PingFang SC",sans-serif;color:var(--text);background:radial-gradient(1200px 500px at 10% -10%,#dbeafe,transparent),linear-gradient(135deg,#f5f8ff,#eef4ff)}
+.page{max-width:980px;margin:0 auto;padding:26px 14px;min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:stretch}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 10px 26px rgba(15,23,42,.08)}
+.brand h1{margin:0 0 10px;font-size:34px;line-height:1.2}.brand p{margin:0 0 16px;color:var(--muted);font-size:15px}
+.list{display:grid;gap:10px;margin:0;padding:0;list-style:none}.list li{padding:10px 12px;background:#f8fbff;border:1px solid #e6efff;border-radius:10px;font-size:14px}
+.form h2{margin:0 0 8px;font-size:28px}.form p{margin:0 0 14px;color:var(--muted)}
+input{width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;font:inherit;min-height:46px}
+button{margin-top:10px;width:100%;padding:12px;border:none;border-radius:12px;background:var(--c);color:#fff;font:inherit;font-weight:700;cursor:pointer;min-height:46px}
+#msg{margin-top:12px;font-size:13px;min-height:20px}
+@media (max-width:900px){.page{grid-template-columns:1fr;padding:14px 10px}.panel{padding:16px}.brand h1{font-size:26px}.form h2{font-size:24px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>管理员入口</h1>
-  <p>输入管理员密钥，进入后台并免邀请码使用。</p>
-  <input id="secret" type="password" placeholder="Admin Secret">
-  <button id="go">进入</button>
-  <div id="msg"></div>
+<div class="page">
+  <section class="panel brand">
+    <h1>在日商家单据系统</h1>
+    <p>快速生成請求書・領収書，适合日常开单与对账管理。</p>
+    <ul class="list">
+      <li>請求書 / 領収書 双模板切换</li>
+      <li>多主题配色，满足不同品牌风格</li>
+      <li>支持移动端填写，桌面端打印更稳定</li>
+    </ul>
+  </section>
+
+  <section class="panel form">
+    <h2>管理员登录</h2>
+    <p>输入管理员密钥后，可进入邀请码管理后台。</p>
+    <input id="secret" type="password" placeholder="请输入管理员密钥">
+    <button id="go">进入后台</button>
+    <div id="msg"></div>
+  </section>
 </div>
 <script>
 const msg=document.getElementById('msg');

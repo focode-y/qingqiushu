@@ -57,28 +57,15 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
 .inshi-note{margin-top:8px;border:2px dotted #9ca3af;display:inline-block;padding:6px 8px;font-size:16px;line-height:1.25;color:#334155}
 .stamp-wrap{position:absolute;right:28px;bottom:60px;cursor:grab}.stamp-wrap img{max-width:90px;max-height:90px;display:block}
 @media print{
-  @page{size:A4;margin:6mm}
   .panel,.op{display:none!important}
-  body{background:#fff;font-size:11px;line-height:1.2}
+  body{background:#fff}
   .layout{display:block;padding:0}
-  .paper{border:none;padding:5mm 6mm;max-width:none;box-shadow:none;width:198mm;min-height:285mm;margin:0 auto}
-  .doc-title-bar{font-size:18px;padding:6px 0;margin-bottom:8px}
-  .meta-col{gap:2px;margin-bottom:8px}
-  .to-block{margin-bottom:10px!important}
-  .amount-banner .av{font-size:22px;padding:6px 10px}
-  .from-block{padding:6px 8px;line-height:1.45}
-  table.items th,table.items td{padding:2px 4px;font-size:10px}
-  .tax-table th,.tax-table td,.totals-table td{padding:3px 6px;font-size:10px}
-  .memo-body{padding:6px 8px;min-height:24px}
-  .inshi-note{font-size:14px;padding:4px 6px}
-  .stamp-wrap img{max-width:64px;max-height:64px}
-}
-@media screen{
-  .pdf-mode .panel{display:none!important}
-  .pdf-mode .layout{display:block!important;padding:0!important;max-width:none!important}
-  .pdf-mode .paper{border:none!important;padding:5mm 6mm!important;max-width:none!important;box-shadow:none!important;width:198mm!important;min-height:285mm!important;margin:0 auto!important}
-  .pdf-mode table.items th,.pdf-mode table.items td{padding:2px 4px!important;font-size:10px!important}
-  .pdf-mode .tax-table th,.pdf-mode .tax-table td,.pdf-mode .totals-table td{padding:3px 6px!important;font-size:10px!important}
+  .paper{border:none;padding:8mm 10mm;max-width:none;box-shadow:none}
+  input,select,textarea{border:none!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;padding:0!important}
+  input[type="date"]::-webkit-calendar-picker-indicator{display:none!important}
+  .del-btn{display:none!important}
+  .stamp-wrap{cursor:default}
+  .doc-title-bar,.amount-banner .al,.items th,.tax-table th,.totals-table .highlight td,.memo-label{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 @media(max-width:1060px){.layout{grid-template-columns:1fr}.panel{position:static}}
 @media(max-width:820px){
@@ -96,6 +83,13 @@ table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;fo
   .bottom-section{grid-template-columns:1fr;gap:10px}
   .totals-table,.tax-table{min-width:100%;margin-left:0}
   table.items{font-size:12px}
+}
+@media screen{
+  .pdf-mode .panel{display:none!important}
+  .pdf-mode .layout{display:block!important;padding:0!important;max-width:none!important}
+  .pdf-mode .paper{border:none!important;padding:8mm 10mm!important;max-width:none!important;box-shadow:none!important}
+  .pdf-mode input,.pdf-mode select,.pdf-mode textarea{border:none!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;padding:0!important}
+  .pdf-mode .op,.pdf-mode .del-btn{display:none!important}
 }
 </style>
 </head>
@@ -271,3 +265,5 @@ stamp_file.addEventListener('change',e=>{const f=e.target.files&&e.target.files[
 </script>
 </body>
 </html>
+
+
