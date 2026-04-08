@@ -1,103 +1,310 @@
-<!doctype html>
-<html lang="ja">
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>类目管理</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>品名管理</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
-*{box-sizing:border-box}
-body{margin:0;background:#f0f4f8;color:#0f172a;font-family:'Noto Sans JP',sans-serif}
-.wrap{max-width:920px;margin:16px auto;padding:0 16px}
-.card{background:#fff;border:1px solid #dce6f0;border-radius:12px;padding:16px}
-h1{margin:0 0 8px;font-size:24px}
-p{margin:0 0 14px;color:#475569}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-input[type=text]{flex:1;min-width:220px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font:inherit}
-button{border:none;background:#1d4ed8;color:#fff;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
-button.ghost{background:#fff;border:1px solid #cbd5e1;color:#1f2937}
-table{width:100%;border-collapse:collapse;margin-top:14px}
-th,td{border:1px solid #dbe3ef;padding:8px 10px;text-align:left}
-th{background:#eff6ff}
-.muted{color:#64748b;font-size:13px}
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.18);
+    --accent: #00e5a0;
+    --accent-dim: rgba(0,229,160,0.12);
+    --accent-dim2: rgba(0,229,160,0.06);
+    --text: #f0f0f0;
+    --text-muted: #888;
+    --text-dim: #555;
+    --danger: #ff4d4d;
+    --danger-dim: rgba(255,77,77,0.12);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; }
+
+  .header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
+  .header h1 { font-size: 18px; font-weight: 500; letter-spacing: .04em; display: flex; align-items: center; gap: 10px; }
+  .header h1::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .header p { margin-top: 6px; font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .filter-btn { padding: 4px 14px; border-radius: 99px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 12px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; transition: all .15s; }
+  .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  .add-row { display: grid; grid-template-columns: 1fr 1fr 130px auto; gap: 8px; margin-bottom: 1rem; align-items: center; }
+  @media (max-width: 600px) { .add-row { grid-template-columns: 1fr 1fr; } .add-row select, .add-row button { grid-column: span 1; } }
+
+  input[type="text"], select {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 13px;
+    padding: 8px 12px; outline: none; width: 100%; transition: border-color .15s;
+  }
+  input[type="text"]::placeholder { color: var(--text-dim); }
+  input[type="text"]:focus, select:focus { border-color: var(--accent); }
+  select option { background: #1e1e1e; }
+
+  .add-btn { padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: var(--radius); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity .15s; }
+  .add-btn:hover { opacity: .85; }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  thead th { font-size: 11px; font-weight: 500; color: var(--text-dim); text-align: left; padding: 10px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); letter-spacing: .06em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+  th:nth-child(1) { width: 90px; }
+  th:nth-child(2) { width: auto; }
+  th:nth-child(3) { width: auto; }
+  th:nth-child(4) { width: 48px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--accent-dim2); }
+
+  .cat-badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .cat-家具  { background: rgba(147,112,219,.15); color: #b49fea; border: 1px solid rgba(147,112,219,.25); }
+  .cat-家电  { background: rgba(56,189,248,.12);  color: #7dd3fc; border: 1px solid rgba(56,189,248,.22); }
+  .cat-空调  { background: rgba(0,229,160,.12);   color: #00e5a0; border: 1px solid rgba(0,229,160,.22); }
+  .cat-自行车{ background: rgba(251,191,36,.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,.22); }
+  .cat-其他  { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.22); }
+
+  .edit-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid transparent; color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; padding: 2px 0; outline: none; transition: border-color .15s; }
+  .edit-input:focus { border-bottom-color: var(--accent); }
+
+  .del-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; padding: 3px 6px; border-radius: 4px; transition: all .15s; display: flex; align-items: center; justify-content: center; }
+  .del-btn:hover { background: var(--danger-dim); color: var(--danger); }
+
+  .empty-row td { text-align: center; color: var(--text-dim); padding: 32px 0; font-size: 13px; }
+
+  .bottom-bar { display: flex; align-items: center; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+  .ghost-btn { padding: 7px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); font-family: 'Noto Sans JP', sans-serif; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .ghost-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .danger-btn { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,77,77,.3); border-radius: var(--radius); color: var(--danger); font-family: 'Noto Sans JP', sans-serif; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .danger-btn:hover { background: var(--danger-dim); border-color: var(--danger); }
+  .count { font-size: 12px; color: var(--text-dim); font-family: 'DM Mono', monospace; margin-left: auto; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--accent); color: #000; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: var(--radius); opacity: 0; transform: translateY(8px); transition: all .25s; pointer-events: none; z-index: 999; }
+  .toast.show { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="card">
-      <h1>常用品名管理</h1>
-      <p>这里维护常用类目，請求書/領収書 的品名输入框可直接下拉选择，也可继续手动输入。</p>
-      <div class="row">
-        <input id="nameInput" type="text" placeholder="例如：事務机椅子">
-        <button id="addBtn">新增</button>
-        <button id="resetBtn" class="ghost">恢复默认</button>
-      </div>
-      <table>
-        <thead><tr><th style="width:72px">序号</th><th>品名</th><th style="width:90px">操作</th></tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div class="muted" style="margin-top:10px">默认类目：事務机椅子、ソファ。</div>
-    </section>
+<div class="container">
+
+  <div class="header">
+    <h1>品名管理</h1>
+    <p>请求书 · 领収书 共用品名库 · 中文检索 / 日語入力</p>
   </div>
+
+  <div class="filter-bar" id="filterBar"></div>
+
+  <div class="add-row">
+    <input type="text" id="newZh" placeholder="中文品名" />
+    <input type="text" id="newJa" placeholder="日本語品名" />
+    <select id="newCat">
+      <option value="家具">家具</option>
+      <option value="家电">家电</option>
+      <option value="空调">空调</option>
+      <option value="自行车">自行车</option>
+      <option value="其他">其他</option>
+    </select>
+    <button class="add-btn" onclick="addItem()">+ 追加</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>カテゴリ</th>
+          <th>中文</th>
+          <th>日本語</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="danger-btn" onclick="resetDefaults()">恢复默认</button>
+    <span class="count" id="countLabel"></span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const KEY = 'item_categories_v1';
-const DEFAULTS = ['事務机椅子','ソファ'];
-const tbody = document.getElementById('tbody');
-const nameInput = document.getElementById('nameInput');
+const LS_KEY = 'item_names_v2';
+const CATS = ["全部","家具","家电","空调","自行车","其他"];
+const DEFAULT_ITEMS = [
+  {cat:"家具",zh:"二手沙发",ja:"中古ソファ"},
+  {cat:"家具",zh:"二手餐桌",ja:"中古ダイニングテーブル"},
+  {cat:"家具",zh:"二手椅子",ja:"中古椅子"},
+  {cat:"家具",zh:"二手床架",ja:"中古ベッドフレーム"},
+  {cat:"家具",zh:"二手床垫",ja:"中古マットレス"},
+  {cat:"家具",zh:"二手衣柜",ja:"中古ワードローブ／洋服タンス"},
+  {cat:"家具",zh:"二手书柜",ja:"中古本棚"},
+  {cat:"家具",zh:"二手电视柜",ja:"中古テレビボード"},
+  {cat:"家具",zh:"二手茶几",ja:"中古センターテーブル"},
+  {cat:"家具",zh:"二手办公桌",ja:"中古デスク"},
+  {cat:"家具",zh:"二手鞋柜",ja:"中古シューズボックス"},
+  {cat:"家具",zh:"二手收纳柜",ja:"中古収納棚"},
+  {cat:"家具",zh:"二手梳妆台",ja:"中古ドレッサー"},
+  {cat:"家电",zh:"二手冰箱",ja:"中古冷蔵庫"},
+  {cat:"家电",zh:"二手洗衣机",ja:"中古洗濯機"},
+  {cat:"家电",zh:"二手微波炉",ja:"中古電子レンジ"},
+  {cat:"家电",zh:"二手烤箱",ja:"中古オーブン"},
+  {cat:"家电",zh:"二手电饭锅",ja:"中古炊飯器"},
+  {cat:"家电",zh:"二手电视机",ja:"中古テレビ"},
+  {cat:"家电",zh:"二手吸尘器",ja:"中古掃除機"},
+  {cat:"家电",zh:"二手热水壶",ja:"中古電気ケトル"},
+  {cat:"家电",zh:"二手加湿器",ja:"中古加湿器"},
+  {cat:"家电",zh:"二手空气净化器",ja:"中古空気清浄機"},
+  {cat:"家电",zh:"二手暖风机",ja:"中古ファンヒーター"},
+  {cat:"家电",zh:"二手电风扇",ja:"中古扇風機"},
+  {cat:"家电",zh:"二手洗碗机",ja:"中古食器洗い乾燥機"},
+  {cat:"家电",zh:"二手干衣机",ja:"中古乾燥機"},
+  {cat:"空调",zh:"二手空调（室内机）",ja:"中古エアコン（室内機）"},
+  {cat:"空调",zh:"二手空调（室外机）",ja:"中古エアコン（室外機）"},
+  {cat:"空调",zh:"二手空调（内外机套装）",ja:"中古エアコン一式"},
+  {cat:"空调",zh:"空调安装费",ja:"エアコン取付工事費"},
+  {cat:"空调",zh:"空调拆卸费",ja:"エアコン取外し工事費"},
+  {cat:"空调",zh:"空调搬运费",ja:"エアコン運搬費"},
+  {cat:"自行车",zh:"二手自行车",ja:"中古自転車"},
+  {cat:"自行车",zh:"二手电动自行车",ja:"中古電動アシスト自転車"},
+  {cat:"自行车",zh:"二手儿童自行车",ja:"中古子ども用自転車"},
+  {cat:"自行车",zh:"二手折叠自行车",ja:"中古折りたたみ自転車"},
+  {cat:"自行车",zh:"二手山地车",ja:"中古マウンテンバイク"},
+  {cat:"自行车",zh:"自行车修理费",ja:"自転車修理費"},
+  {cat:"自行车",zh:"自行车配件",ja:"自転車部品"},
+  {cat:"其他",zh:"搬运费",ja:"運搬費"},
+  {cat:"其他",zh:"配送费",ja:"配送料"},
+  {cat:"其他",zh:"上楼费",ja:"階段搬入費"},
+  {cat:"其他",zh:"处理费",ja:"処分費"},
+  {cat:"其他",zh:"清洁费",ja:"クリーニング費"},
+  {cat:"其他",zh:"修理费",ja:"修理費"},
+  {cat:"其他",zh:"手续费",ja:"手数料"},
+];
 
-function loadCategories(){
-  try{
-    const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
-    if(Array.isArray(arr) && arr.length){
-      return [...new Set(arr.map(x => String(x || '').trim()).filter(Boolean))];
+let items = [];
+let nextId = 0;
+let activeFilter = "全部";
+
+function loadFromLS() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (Array.isArray(arr) && arr.length) {
+      items = arr.map((d, i) => ({ id: i, cat: d.cat, zh: d.zh, ja: d.ja }));
+      nextId = items.length;
+      return;
     }
-  }catch(e){}
-  return [...DEFAULTS];
+  } catch(e) {}
+  items = DEFAULT_ITEMS.map((d, i) => ({ id: i, cat: d.cat, zh: d.zh, ja: d.ja }));
+  nextId = items.length;
+  saveToLS();
 }
 
-function saveCategories(list){
-  localStorage.setItem(KEY, JSON.stringify(list));
+function saveToLS() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(items.map(i => ({ cat: i.cat, zh: i.zh, ja: i.ja }))));
+  } catch(e) {}
 }
 
-function render(){
-  const list = loadCategories();
-  tbody.innerHTML = '';
-  list.forEach((name, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${idx + 1}</td><td>${name}</td><td><button class="ghost">删除</button></td>`;
-    tr.querySelector('button').onclick = () => {
-      const next = loadCategories().filter(x => x !== name);
-      saveCategories(next.length ? next : [...DEFAULTS]);
-      render();
-    };
-    tbody.appendChild(tr);
-  });
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-document.getElementById('addBtn').onclick = () => {
-  const value = nameInput.value.trim();
-  if(!value) return;
-  const list = loadCategories();
-  if(!list.includes(value)){
-    list.push(value);
-    saveCategories(list);
+function renderFilters() {
+  document.getElementById("filterBar").innerHTML = CATS.map(c =>
+    `<button class="filter-btn${activeFilter === c ? ' active' : ''}" onclick="setFilter('${c}')">${c}</button>`
+  ).join("");
+}
+
+function setFilter(c) { activeFilter = c; render(); }
+
+function render() {
+  renderFilters();
+  const list = activeFilter === "全部" ? items : items.filter(i => i.cat === activeFilter);
+  const tbody = document.getElementById("tbody");
+  if (!list.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">品名がありません</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(item => `
+      <tr>
+        <td><span class="cat-badge cat-${item.cat}">${item.cat}</span></td>
+        <td><input class="edit-input" value="${escHtml(item.zh)}" onchange="updateItem(${item.id},'zh',this.value)" /></td>
+        <td><input class="edit-input" value="${escHtml(item.ja)}" onchange="updateItem(${item.id},'ja',this.value)" /></td>
+        <td>
+          <button class="del-btn" onclick="delItem(${item.id})" title="削除">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2L11 11M11 2L2 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </td>
+      </tr>`).join("");
   }
-  nameInput.value = '';
-  render();
-};
+  document.getElementById("countLabel").textContent = `${items.length} 件`;
+}
 
-document.getElementById('resetBtn').onclick = () => {
-  saveCategories([...DEFAULTS]);
+function addItem() {
+  const zh = document.getElementById("newZh").value.trim();
+  const ja = document.getElementById("newJa").value.trim();
+  const cat = document.getElementById("newCat").value;
+  if (!zh || !ja) { showToast("中文と日本語を入力してください"); return; }
+  items.push({ id: nextId++, cat, zh, ja });
+  saveToLS();
+  document.getElementById("newZh").value = "";
+  document.getElementById("newJa").value = "";
+  activeFilter = "全部";
   render();
-};
+  showToast("追加しました");
+}
 
-nameInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    document.getElementById('addBtn').click();
+function delItem(id) {
+  items = items.filter(i => i.id !== id);
+  saveToLS();
+  render();
+  showToast("削除しました");
+}
+
+function updateItem(id, field, val) {
+  const item = items.find(i => i.id === id);
+  if (item) { item[field] = val; saveToLS(); }
+}
+
+function resetDefaults() {
+  if (!confirm("默认品名を恢复しますか？现在的数据会被覆盖。")) return;
+  items = DEFAULT_ITEMS.map((d, i) => ({ id: i, cat: d.cat, zh: d.zh, ja: d.ja }));
+  nextId = items.length;
+  saveToLS();
+  activeFilter = "全部";
+  render();
+  showToast("恢复完成");
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && (document.activeElement.id === "newZh" || document.activeElement.id === "newJa")) {
+    addItem();
   }
 });
 
+loadFromLS();
 render();
 </script>
 </body>
