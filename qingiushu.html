@@ -211,7 +211,6 @@ table.items .del-btn:hover{color:#c53030}
           <tr>
             <th style="width:82px">日付</th>
             <th>内容</th>
-            <th style="width:44px;white-space:nowrap">軽減</th>
             <th style="width:52px">数量</th>
             <th style="width:44px">単位</th>
             <th style="width:92px">単価（税抜）</th>
@@ -226,7 +225,6 @@ table.items .del-btn:hover{color:#c53030}
 
     <div class="bottom-section">
       <div>
-        <div class="tax-note">※は軽減税率対象です。</div>
         <table class="tax-table">
           <thead><tr><th>税率区分</th><th>消費税</th><th>金額（税抜）</th></tr></thead>
           <tbody>
@@ -414,7 +412,6 @@ function addRow(v={}) {
   tr.innerHTML = `
     <td><input class="dt" type="date" value="${v.date||''}"></td>
     <td class="tl"><input class="n" autocomplete="off" value="${v.name||''}" style="width:100%;min-width:120px" placeholder="品名・内容"></td>
-    <td><select class="red"><option value="">-</option><option value="※">※</option></select></td>
     <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}" style="width:44px;text-align:center"></td>
     <td><input class="u" value="${v.unit||'式'}" style="width:36px;text-align:center"></td>
     <td><input class="p" type="number" min="0" value="${v.price||0}" style="width:80px;text-align:right"></td>
@@ -422,8 +419,7 @@ function addRow(v={}) {
     <td class="tr b">¥0</td>
     <td class="op"><button class="del-btn" onclick="this.closest('tr').remove();calc()" title="削除">✕</button></td>`;
   attachItemDropdown(tr.querySelector('.n'));
-  tr.querySelector('.t').value   = String(v.tax||10);
-  tr.querySelector('.red').value = v.red||'';
+  tr.querySelector('.t').value = String(v.tax||10);
   tr.querySelectorAll('input,select').forEach(e => e.addEventListener('input', calc));
   tbody.appendChild(tr);
   calc();
@@ -492,6 +488,10 @@ stamp_file.addEventListener('change', e => {
   doc_no.value   = '0000001';
   loadIssuer();
   bindStamp();
+  [i_zip, to_zip].forEach(el => el.addEventListener('blur', () => {
+    const v = el.value.trim();
+    if (v && !v.startsWith('〒')) { el.value = '〒' + v; el.dispatchEvent(new Event('input')); }
+  }));
 })();
 </script>
 </body>

@@ -329,7 +329,12 @@ function bindStamp(){
 stamp_file.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{stamp_img.src=r.result; stamp_img.style.display='block';}; r.readAsDataURL(f);});
 
 
-(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer(); addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
+(()=>{const today=new Date().toISOString().slice(0,10); doc_date.value=today; doc_no.value='R-000001'; paid_date.value=''; loadIssuer();
+  [i_zip, to_zip].forEach(el => el.addEventListener('blur', () => {
+    const v = el.value.trim();
+    if (v && !v.startsWith('〒')) { el.value = '〒' + v; el.dispatchEvent(new Event('input')); }
+  }));
+  addRow({date:today,qty:1,unit:'式',price:0,tax:10}); bindStamp();})();
 </script>
 </body>
 </html>
