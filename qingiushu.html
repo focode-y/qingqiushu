@@ -141,7 +141,7 @@ table.items .del-btn:hover{color:#c53030}
 </style>
 </head>
 <body>
-<div class="mobile-tools"><button id="togglePanelBtn" type="button">鏄剧ず缂栬緫闈㈡澘</button></div>
+<div class="mobile-tools"><button id="togglePanelBtn" type="button">显示编辑面板</button></div>
 <div class="layout">
 
   <!-- ===== 宸︺儜銉嶃儷 ===== -->
@@ -395,25 +395,18 @@ stamp_file.addEventListener('change', e => {
   doc_no.value   = '0000001';
   loadIssuer();
   bindStamp();
-  const isMobile = window.matchMedia('(max-width: 820px)').matches;
-  if (isMobile) { panel.style.display = 'none'; }
   const btn = document.getElementById('togglePanelBtn');
   const panel = document.querySelector('.panel');
-  if (btn) {
+  const isMobile = window.matchMedia('(max-width: 820px)').matches;
+  if (isMobile && panel) { panel.style.display = 'none'; }
+  if (btn && panel) {
     btn.addEventListener('click', () => {
-      document.body.classList.toggle('mobile-collapsed');
-      btn.textContent = document.body.classList.contains('mobile-collapsed') ? '鏄剧ず缂栬緫闈㈡澘' : '闅愯棌缂栬緫闈㈡澘';
+      const hidden = panel.style.display === 'none';
+      panel.style.display = hidden ? '' : 'none';
+      btn.textContent = hidden ? '隐藏编辑面板' : '显示编辑面板';
     });
   }
 })();
 </script>
 </body>
 </html>
-  .mobile-tools{display:flex;justify-content:flex-end;margin-bottom:8px}
-  .mobile-tools button{border:none;background:#1a56db;color:#fff;border-radius:8px;padding:8px 10px;font-size:13px;min-height:38px}
-  .panel{display:none}
-  .layout{grid-template-columns:1fr}
-  .paper{margin-top:0}
-
-
-
