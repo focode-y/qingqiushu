@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>請求書兼領収書</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f4f8;font-family:'Noto Sans JP','Meiryo',sans-serif;color:#1a1a2e;font-size:13px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.layout{display:grid;grid-template-columns:210px 1fr;gap:16px;padding:16px;max-width:1280px;margin:0 auto}
+.panel{background:#fff;border:1px solid #dce6f0;border-radius:10px;padding:14px;position:sticky;top:12px;height:fit-content;max-height:calc(100vh - 24px);overflow-y:auto}
+.panel h2{font-size:14px;font-weight:700;color:#1a56db;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8f0fe}
+.f{margin:7px 0}
+.f label{font-size:11px;color:#667085;display:block;margin-bottom:2px;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.f input,.f textarea{width:100%;padding:6px 8px;border:1px solid #ced7e6;border-radius:6px;font-size:13px;font-family:inherit;color:#1a1a2e}
+.f textarea{resize:vertical}
+.f input:focus,.f textarea:focus{outline:none;border-color:#1a56db;box-shadow:0 0 0 2px #e8f0fe}
+.sec-label{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px;padding-top:10px;border-top:1px solid #f0f4f8}
+.btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.btns button{padding:7px 12px;border:none;background:#1a56db;color:#fff;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500}
+.btns button.ghost{background:#fff;border:1px solid #ced7e6;color:#374151}
+.btns button.ghost:hover{background:#f3f7ff}
+
+.paper{background:#fff;border:1px solid #dce6f0;border-radius:10px;padding:28px 32px 36px;position:relative;max-width:920px}
+.doc-title-bar{background:#1a56db;color:#fff;text-align:center;font-size:22px;font-weight:700;letter-spacing:.25em;padding:10px 0;border-radius:6px;margin-bottom:16px}
+
+.meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:5px;margin-bottom:16px}
+.meta-col .mitem{display:flex;align-items:center;gap:8px;font-size:13px}
+.meta-col .mitem span{color:#667085;white-space:nowrap}
+.meta-col input{border:none;border-bottom:1px solid #d1d9e6;padding:2px 4px;font-size:13px;font-family:inherit;width:130px;background:transparent;text-align:right}
+.meta-col input:focus{outline:none;border-bottom-color:#1a56db}
+
+.to-name-line{font-size:20px;font-weight:700;margin-bottom:4px;display:flex;align-items:center}
+.to-name-line input{font-size:20px;font-weight:700;border:none;border-bottom:2px solid #1a1a2e;flex:1;background:transparent;font-family:inherit}
+.to-name-line input:focus{outline:none;border-bottom-color:#1a56db}
+.to-sub input{border:none;border-bottom:1px solid #d1d9e6;font-size:13px;font-family:inherit;background:transparent;padding:1px 3px;width:100%;margin-top:5px}
+.to-sub input:focus{outline:none;border-bottom-color:#1a56db}
+.notice{font-size:13px;margin-top:12px;color:#374151}
+
+.from-block{padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;line-height:1.85}
+.from-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.from-zip{font-size:12px;color:#667085;margin-bottom:4px}
+.from-row{display:flex;gap:8px}
+.from-label{color:#667085;min-width:50px;flex-shrink:0}
+
+.amount-banner{border:2px solid #1a56db;border-radius:8px;overflow:hidden}
+.amount-banner .al{background:#1a56db;color:#fff;font-size:13px;font-weight:600;padding:7px 14px;text-align:center}
+.amount-banner .av{font-size:26px;font-weight:700;color:#1a1a2e;padding:10px 14px;text-align:right}
+
+.bank-date-wrap{width:50%;margin-bottom:6px}
+.bank-date-box{width:100%;border:1px solid #ccd8ec;border-radius:7px;overflow:hidden;border-collapse:separate;border-spacing:0;display:table}
+.bank-date-box .bd-row{display:table-row}
+.bank-date-box .bd-label{display:table-cell;background:#1a56db;color:#fff;font-size:12px;font-weight:600;padding:8px 14px;text-align:center;vertical-align:middle;white-space:nowrap;width:64px;border-bottom:1px solid #4a7fe8}
+.bank-date-box .bd-val{display:table-cell;padding:8px 12px;font-size:13px;white-space:pre-line;vertical-align:middle;border-bottom:1px solid #ccd8ec}
+.bank-date-box .bd-row:last-child .bd-label,.bank-date-box .bd-row:last-child .bd-val{border-bottom:none}
+.bank-date-box input{border:none;font-size:13px;font-family:inherit;background:transparent;width:100%}
+.bank-date-box input:focus{outline:none}
+.bank-note{font-size:12px;color:#374151;margin-bottom:14px;padding:0 2px}
+
+.items-wrap{margin-bottom:14px;overflow-x:auto}
+table.items{width:100%;border-collapse:collapse;font-size:13px}
+table.items th{background:#1a56db;color:#fff;text-align:center;font-weight:600;padding:7px 8px;border:1px solid #1648c0}
+table.items td{border:1px solid #d1d9e6;padding:5px 7px;text-align:center;vertical-align:middle}
+table.items td.tl{text-align:left}
+table.items td.tr{text-align:right}
+table.items tbody tr:hover{background:#f5f8ff}
+table.items input,table.items select{border:none;background:transparent;font-size:13px;font-family:inherit;width:100%;text-align:inherit}
+table.items input:focus,table.items select:focus{outline:none;background:#eff3ff}
+table.items .del-btn{background:none;border:none;color:#e53e3e;cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
+table.items .del-btn:hover{color:#c53030}
+
+.bottom-section{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;margin-bottom:14px}
+.tax-table{font-size:13px;border-collapse:collapse;min-width:200px}
+.tax-table th{background:#1a56db;color:#fff;padding:6px 12px;text-align:center;border:1px solid #1648c0}
+.tax-table td{border:1px solid #d1d9e6;padding:5px 12px;text-align:right;background:#fff}
+.tax-table td:first-child{text-align:left}
+.totals-table{font-size:13px;border-collapse:collapse;margin-left:auto;min-width:200px}
+.totals-table td{border:1px solid #d1d9e6;padding:5px 14px;text-align:right}
+.totals-table td:first-child{text-align:left;background:#f8fafc;font-weight:500}
+.totals-table .highlight td{background:#1a56db;color:#fff;font-weight:700;font-size:14px;border-color:#1648c0}
+.totals-table .highlight td:first-child{text-align:left}
+
+.memo-box{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:0}
+.memo-label{background:#1a56db;color:#fff;text-align:center;font-size:13px;font-weight:600;padding:5px 0}
+.memo-body{padding:10px 14px;min-height:48px}
+.memo-body input{border:none;width:100%;font-size:13px;font-family:inherit;background:transparent}
+.memo-body input:focus{outline:none}
+
+/* 切り取り線 */
+.cut-line{border:none;border-top:2px dashed #9ca3af;margin:22px 0 18px;position:relative}
+.cut-line::after{content:"✂  切り取り";position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#fff;padding:0 10px;font-size:11px;color:#9ca3af;white-space:nowrap}
+
+/* 領収書セクション */
+.ryoshu-title{background:#1a56db;color:#fff;text-align:center;font-size:18px;font-weight:700;letter-spacing:.25em;padding:8px 0;border-radius:6px;margin-bottom:14px}
+.ryoshu-body{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start}
+.ryoshu-to{font-size:18px;font-weight:700;border-bottom:2px solid #1a1a2e;padding-bottom:4px;margin-bottom:10px}
+.ryoshu-amount{font-size:24px;font-weight:700;margin-bottom:6px}
+.ryoshu-amount em{font-size:13px;font-weight:400;font-style:normal;color:#667085;margin-left:6px}
+.ryoshu-tadashi{font-size:13px;color:#374151;margin-bottom:4px}
+.ryoshu-confirm{font-size:13px;color:#374151;margin-top:8px}
+.ryoshu-right{text-align:right;min-width:180px}
+.ryoshu-date{font-size:12px;color:#667085;margin-bottom:6px}
+.ryoshu-issuer-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.ryoshu-issuer-sub{font-size:12px;color:#667085;line-height:1.6}
+.inshi-box{display:inline-block;border:2px dotted #9ca3af;padding:6px 10px;font-size:11px;color:#9ca3af;min-width:72px;min-height:56px;text-align:center;line-height:1.5;margin-top:8px;vertical-align:top}
+
+.stamp-wrap{position:absolute;right:28px;bottom:40px;cursor:grab}
+.stamp-wrap img{max-width:90px;max-height:90px;display:block}
+
+#item-dd{display:none;position:fixed;background:#fff;border:1px solid #ced7e6;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:9999;max-height:300px;overflow-y:auto;min-width:260px}
+.name-opt{padding:7px 12px;cursor:pointer;border-bottom:1px solid #f0f4f8}
+.name-opt:last-child{border-bottom:none}
+.name-opt:hover,.name-opt.active{background:#f0f4ff}
+.opt-ja{font-size:13px;color:#1a1a2e;font-weight:500}
+.opt-meta{font-size:11px;color:#9ca3af;margin-top:2px;display:flex;align-items:center;gap:5px}
+.opt-cat{background:#e8f0fe;color:#1a56db;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600}
+.from-name:empty::before{content:attr(data-ph);color:#c0c8d8;font-weight:400}
+.from-zip:empty::before{content:attr(data-ph);color:#c0c8d8}
+
+@media print{
+  .panel,.op{display:none!important}
+  body{background:#fff}
+  .layout{display:block;padding:0}
+  .paper{border:none;padding:8mm 10mm;max-width:none;box-shadow:none}
+  input,select,textarea{border:none!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;padding:0!important}
+  input[type="date"]::-webkit-calendar-picker-indicator{display:none!important}
+  .del-btn{display:none!important}
+  .stamp-wrap{cursor:default}
+  .doc-title-bar,.ryoshu-title,.amount-banner .al,.bank-date-box .bd-label,
+  table.items th,.tax-table th,.totals-table .highlight td,.memo-label{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:1060px){.layout{grid-template-columns:1fr}.panel{position:static}}
+@media screen{
+  .pdf-mode .panel{display:none!important}
+  .pdf-mode .layout{display:block!important;padding:0!important;max-width:none!important}
+  .pdf-mode .paper{border:none!important;padding:8mm 10mm!important;max-width:none!important;box-shadow:none!important}
+  .pdf-mode input,.pdf-mode select,.pdf-mode textarea{border:none!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;padding:0!important}
+  .pdf-mode .op,.pdf-mode .del-btn{display:none!important}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ===== 左パネル ===== -->
+  <aside class="panel">
+    <h2>発行者情報</h2>
+    <div class="f"><label>会社名</label><input id="i_name" placeholder="●●●●株式会社"></div>
+    <div class="f"><label>郵便番号</label><input id="i_zip" placeholder="〒010-0000"></div>
+    <div class="f"><label>住所</label><input id="i_addr" placeholder="東京都○○区0-1-2 ○○ビル 1F"></div>
+    <div class="f"><label>電話</label><input id="i_tel" placeholder="00-0000-0000"></div>
+    <div class="f"><label>メール（任意）</label><input id="i_email" placeholder="info@example.com"></div>
+    <div class="f"><label>登録番号（任意）</label><input id="i_reg" placeholder="T1234567890123"></div>
+    <div class="f"><label>振込先</label><textarea id="i_bank" rows="3" placeholder="○○銀行 ○○支店 普通 1234567&#10;口座名義：○○○○"></textarea></div>
+
+    <div class="sec-label">領収書</div>
+    <div class="f"><label>但し書き</label><input id="i_tadashi" placeholder="中古品代として"></div>
+
+    <div class="sec-label">操作</div>
+    <div class="f">
+      <label>単価入力方式</label>
+      <div style="display:flex;gap:0;border:1px solid #ced7e6;border-radius:6px;overflow:hidden;margin-top:2px">
+        <button id="mode_excl" onclick="setTaxMode('excl')" style="flex:1;padding:5px 0;border:none;background:#1a56db;color:#fff;font-size:12px;font-family:inherit;cursor:pointer;font-weight:700">税抜き</button>
+        <button id="mode_incl" onclick="setTaxMode('incl')" style="flex:1;padding:5px 0;border:none;background:#f0f4f8;color:#aab4c4;font-size:12px;font-family:inherit;cursor:pointer;border-left:1px solid #ced7e6;font-weight:400">税込み</button>
+      </div>
+      <div id="tax_mode_hint" style="font-size:11px;margin-top:4px;color:#1a56db;font-weight:600">▶ 税抜き単価を入力してください</div>
+    </div>
+    <div class="f"><label>印影 PNG</label><input id="stamp_file" type="file" accept="image/*"></div>
+    <div class="btns">
+      <button onclick="addRow()">＋ 明細行を追加</button>
+      <button class="ghost" onclick="onPdfClick()">🖨 印刷 / PDF</button>
+    </div>
+  </aside>
+
+  <!-- ===== 書類本体 ===== -->
+  <section class="paper" id="paper">
+    <div class="doc-title-bar">請求書兼領収書</div>
+
+    <div class="meta-col">
+      <div class="mitem"><span>発行日</span><input id="doc_date" type="date"></div>
+      <div class="mitem"><span>番号</span><input id="doc_no"></div>
+    </div>
+
+    <!-- 請求先 -->
+    <div class="to-block" style="margin-bottom:18px">
+      <div style="font-size:12px;color:#667085;margin-bottom:2px">
+        <input id="to_zip" placeholder="〒100-0000" style="border:none;border-bottom:1px solid #d1d9e6;font-size:12px;font-family:inherit;background:transparent;width:110px;padding:1px 3px">
+      </div>
+      <div class="to-name-line"><input id="to_name" placeholder="〇〇〇〇株式会社 御中"></div>
+      <div class="to-sub"><input id="to_addr" placeholder="東京都千代田区0-1-2 〇〇ビル 3F"></div>
+      <div class="notice">下記の通り、ご請求並びに領収いたします。</div>
+    </div>
+
+    <!-- 金額 + 発行者 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:18px">
+      <div class="amount-banner">
+        <div class="al">ご請求・領収金額（税込）</div>
+        <div class="av">¥<span id="v_total">0</span></div>
+      </div>
+      <div class="from-block">
+        <div class="from-name" id="v_issuer_name" data-ph="●●●●株式会社" style="min-height:1.2em"></div>
+        <div class="from-zip" id="v_issuer_zip" data-ph="〒010-0000"></div>
+        <div class="from-row"><span class="from-label">住所</span><span id="v_issuer_addr"></span></div>
+        <div class="from-row"><span class="from-label">電話</span><span id="v_issuer_tel"></span></div>
+        <div id="row_email" class="from-row" style="display:none"><span class="from-label">メール</span><span id="v_issuer_email"></span></div>
+        <div id="row_reg" class="from-row" style="display:none"><span class="from-label">登録番号</span><span id="v_issuer_reg" style="font-size:12px"></span></div>
+      </div>
+    </div>
+
+    <div class="bank-date-wrap"><div class="bank-date-box">
+      <div class="bd-row">
+        <div class="bd-label">振込先</div>
+        <div class="bd-val" id="v_issuer_bank"></div>
+      </div>
+      <div class="bd-row">
+        <div class="bd-label">振込期日</div>
+        <div class="bd-val"><input id="due_date" type="date"></div>
+      </div>
+    </div></div>
+    <div class="bank-note">振込手数料は御社のご負担にてお願いいたします。</div>
+
+    <div class="items-wrap">
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width:82px">日付</th>
+            <th>内容</th>
+            <th style="width:52px">数量</th>
+            <th style="width:44px">単位</th>
+            <th style="width:92px" id="th_price">単価（税抜）</th>
+            <th style="width:48px">税率</th>
+            <th style="width:92px">金額（税抜）</th>
+            <th class="op" style="width:36px"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="bottom-section">
+      <div>
+        <table class="tax-table">
+          <thead><tr><th>税率区分</th><th>消費税</th><th>金額（税抜）</th></tr></thead>
+          <tbody>
+            <tr><td>10%対象</td><td id="v_tax10_amt">¥0</td><td id="v_tax10_base">¥0</td></tr>
+            <tr><td>8%対象</td><td id="v_tax8_amt">¥0</td><td id="v_tax8_base">¥0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <table class="totals-table">
+          <tr><td>小計</td><td id="v_sub">¥0</td></tr>
+          <tr><td>消費税</td><td id="v_tax_sum">¥0</td></tr>
+          <tr class="highlight"><td>合計</td><td id="v_total2">¥0</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="memo-box">
+      <div class="memo-label">備　考</div>
+      <div class="memo-body"><input id="memo" placeholder="備考を入力してください"></div>
+    </div>
+
+    <!-- 切り取り線 -->
+    <hr class="cut-line">
+
+    <!-- 領収書セクション -->
+    <div class="ryoshu-title">領　収　書</div>
+    <div class="ryoshu-body">
+      <div>
+        <div class="ryoshu-to"><span id="r_to_name">　</span> 様</div>
+        <div class="ryoshu-amount">¥<span id="r_total">0</span><em>（税込）</em></div>
+        <div class="ryoshu-tadashi">但し、<span id="r_tadashi">中古品代として</span></div>
+        <div class="ryoshu-confirm">上記正に領収いたしました。</div>
+      </div>
+      <div class="ryoshu-right">
+        <div class="ryoshu-date">発行日：<span id="r_date"></span></div>
+        <div class="ryoshu-issuer-name" id="r_issuer_name"></div>
+        <div class="ryoshu-issuer-sub" id="r_issuer_zip"></div>
+        <div class="ryoshu-issuer-sub" id="r_issuer_tel"></div>
+        <div><div class="inshi-box" id="inshi_box">電子領収書<br>につき<br>印紙不要</div></div>
+      </div>
+    </div>
+
+    <div class="stamp-wrap" id="stamp_wrap"><img id="stamp_img" style="display:none"></div>
+  </section>
+</div>
+
+<script>
+const KSP      = 'stamp_pos_ryoyo_v1';
+const LSKEY    = 'issuer_info_v1'; // 与请求书共享发行者信息
+const ITEMS_KEY = 'item_names_v2';
+const DEFAULT_ITEMS = [
+  {cat:"家具",zh:"二手沙发",ja:"中古ソファ"},
+  {cat:"家具",zh:"二手餐桌",ja:"中古ダイニングテーブル"},
+  {cat:"家具",zh:"二手椅子",ja:"中古椅子"},
+  {cat:"家具",zh:"二手床架",ja:"中古ベッドフレーム"},
+  {cat:"家具",zh:"二手床垫",ja:"中古マットレス"},
+  {cat:"家具",zh:"二手衣柜",ja:"中古ワードローブ／洋服タンス"},
+  {cat:"家具",zh:"二手书柜",ja:"中古本棚"},
+  {cat:"家具",zh:"二手电视柜",ja:"中古テレビボード"},
+  {cat:"家具",zh:"二手茶几",ja:"中古センターテーブル"},
+  {cat:"家具",zh:"二手办公桌",ja:"中古デスク"},
+  {cat:"家具",zh:"二手鞋柜",ja:"中古シューズボックス"},
+  {cat:"家具",zh:"二手收纳柜",ja:"中古収納棚"},
+  {cat:"家具",zh:"二手梳妆台",ja:"中古ドレッサー"},
+  {cat:"家电",zh:"二手冰箱",ja:"中古冷蔵庫"},
+  {cat:"家电",zh:"二手洗衣机",ja:"中古洗濯機"},
+  {cat:"家电",zh:"二手微波炉",ja:"中古電子レンジ"},
+  {cat:"家电",zh:"二手烤箱",ja:"中古オーブン"},
+  {cat:"家电",zh:"二手电饭锅",ja:"中古炊飯器"},
+  {cat:"家电",zh:"二手电视机",ja:"中古テレビ"},
+  {cat:"家电",zh:"二手吸尘器",ja:"中古掃除機"},
+  {cat:"家电",zh:"二手热水壶",ja:"中古電気ケトル"},
+  {cat:"家电",zh:"二手加湿器",ja:"中古加湿器"},
+  {cat:"家电",zh:"二手空气净化器",ja:"中古空気清浄機"},
+  {cat:"家电",zh:"二手暖风机",ja:"中古ファンヒーター"},
+  {cat:"家电",zh:"二手电风扇",ja:"中古扇風機"},
+  {cat:"家电",zh:"二手洗碗机",ja:"中古食器洗い乾燥機"},
+  {cat:"家电",zh:"二手干衣机",ja:"中古乾燥機"},
+  {cat:"空调",zh:"二手空调（室内机）",ja:"中古エアコン（室内機）"},
+  {cat:"空调",zh:"二手空调（室外机）",ja:"中古エアコン（室外機）"},
+  {cat:"空调",zh:"二手空调（内外机套装）",ja:"中古エアコン一式"},
+  {cat:"空调",zh:"空调安装费",ja:"エアコン取付工事費"},
+  {cat:"空调",zh:"空调拆卸费",ja:"エアコン取外し工事費"},
+  {cat:"空调",zh:"空调搬运费",ja:"エアコン運搬費"},
+  {cat:"自行车",zh:"二手自行车",ja:"中古自転車"},
+  {cat:"自行车",zh:"二手电动自行车",ja:"中古電動アシスト自転車"},
+  {cat:"自行车",zh:"二手儿童自行车",ja:"中古子ども用自転車"},
+  {cat:"自行车",zh:"二手折叠自行车",ja:"中古折りたたみ自転車"},
+  {cat:"自行车",zh:"二手山地车",ja:"中古マウンテンバイク"},
+  {cat:"自行车",zh:"自行车修理费",ja:"自転車修理費"},
+  {cat:"自行车",zh:"自行车配件",ja:"自転車部品"},
+  {cat:"其他",zh:"搬运费",ja:"運搬費"},
+  {cat:"其他",zh:"配送费",ja:"配送料"},
+  {cat:"其他",zh:"上楼费",ja:"階段搬入費"},
+  {cat:"其他",zh:"处理费",ja:"処分費"},
+  {cat:"其他",zh:"清洁费",ja:"クリーニング費"},
+  {cat:"其他",zh:"修理费",ja:"修理費"},
+  {cat:"其他",zh:"手续费",ja:"手数料"},
+];
+
+const fmt   = n => '¥' + Number(n||0).toLocaleString('ja-JP');
+const num   = v => { const n = Number(String(v||'').replace(/,/g,'')); return Number.isFinite(n) ? n : 0; };
+const round = n => Math.round(n);
+
+// ===== 発行者同期 =====
+function syncIssuer() {
+  v_issuer_name.textContent = i_name.value;
+  v_issuer_zip.textContent  = i_zip.value;
+  v_issuer_addr.textContent = i_addr.value;
+  v_issuer_tel.textContent  = i_tel.value;
+  v_issuer_bank.textContent = i_bank.value;
+  const emailVal = i_email.value.trim();
+  v_issuer_email.textContent = emailVal;
+  row_email.style.display = emailVal ? '' : 'none';
+  const regVal = i_reg.value.trim();
+  v_issuer_reg.textContent = regVal;
+  row_reg.style.display = regVal ? '' : 'none';
+
+  // 領収書側も同期
+  r_issuer_name.textContent = i_name.value;
+  r_issuer_zip.textContent  = i_zip.value;
+  r_issuer_tel.textContent  = i_tel.value;
+
+  try {
+    localStorage.setItem(LSKEY, JSON.stringify({
+      name:i_name.value, zip:i_zip.value, addr:i_addr.value,
+      tel:i_tel.value, email:i_email.value, reg:i_reg.value, bank:i_bank.value
+    }));
+  } catch(e) {}
+}
+
+function loadIssuer() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LSKEY) || '{}');
+    if (d.name)  i_name.value  = d.name;
+    if (d.zip)   i_zip.value   = d.zip;
+    if (d.addr)  i_addr.value  = d.addr;
+    if (d.tel)   i_tel.value   = d.tel;
+    if (d.email) i_email.value = d.email;
+    if (d.reg)   i_reg.value   = d.reg;
+    if (d.bank)  i_bank.value  = d.bank;
+  } catch(e) {}
+  syncIssuer();
+}
+
+[i_name, i_zip, i_addr, i_tel, i_email, i_reg, i_bank]
+  .forEach(el => el.addEventListener('input', syncIssuer));
+
+// ===== 領収書フィールド同期 =====
+function syncReceipt() {
+  // 宛名：会社名は御中を除いて「様」に
+  const toRaw = to_name.value.replace(/[\s　]*(御中|様)\s*$/,'').trim();
+  r_to_name.textContent = toRaw || '　';
+  // 日付
+  r_date.textContent = doc_date.value || '';
+  // 但し書き
+  r_tadashi.textContent = i_tadashi.value.trim() || '中古品代として';
+}
+
+to_name.addEventListener('input', syncReceipt);
+doc_date.addEventListener('input', syncReceipt);
+i_tadashi.addEventListener('input', syncReceipt);
+
+// ===== 品名ドロップダウン =====
+function loadItems() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(ITEMS_KEY) || 'null');
+    if (Array.isArray(arr) && arr.length) return arr;
+  } catch(e) {}
+  try { localStorage.setItem(ITEMS_KEY, JSON.stringify(DEFAULT_ITEMS)); } catch(e) {}
+  return DEFAULT_ITEMS;
+}
+
+(function(){
+  const dd = document.createElement('div');
+  dd.id = 'item-dd';
+  document.body.appendChild(dd);
+  let cur = null;
+  function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function show(input) {
+    cur = input;
+    const q = input.value.trim().toLowerCase();
+    const list = loadItems().filter(it => !q || it.ja.toLowerCase().includes(q) || it.zh.includes(q));
+    if (!list.length) { dd.style.display='none'; return; }
+    dd.innerHTML = list.map(it =>
+      `<div class="name-opt" data-ja="${escH(it.ja)}">` +
+      `<div class="opt-ja">${escH(it.ja)}</div>` +
+      `<div class="opt-meta">${escH(it.zh)}<span class="opt-cat">${escH(it.cat)}</span></div>` +
+      `</div>`).join('');
+    dd.querySelectorAll('.name-opt').forEach(el =>
+      el.addEventListener('mousedown', e => {
+        e.preventDefault();
+        if (cur) { cur.value = el.dataset.ja; cur.dispatchEvent(new Event('input')); }
+        dd.style.display = 'none';
+      })
+    );
+    const r = input.getBoundingClientRect();
+    dd.style.left = r.left + 'px';
+    dd.style.top  = (r.bottom + 2) + 'px';
+    dd.style.width = Math.max(r.width, 260) + 'px';
+    dd.style.display = 'block';
+  }
+  function hide() { dd.style.display='none'; cur=null; }
+  window.attachItemDropdown = function(input) {
+    input.removeAttribute('list');
+    input.setAttribute('autocomplete','off');
+    input.addEventListener('focus',   () => show(input));
+    input.addEventListener('input',   () => show(input));
+    input.addEventListener('blur',    () => setTimeout(hide, 160));
+    input.addEventListener('keydown', e => {
+      if (dd.style.display==='none') return;
+      const opts=[...dd.querySelectorAll('.name-opt')], sel=dd.querySelector('.name-opt.active'), idx=sel?opts.indexOf(sel):-1;
+      if (!opts.length) return;
+      if (e.key==='ArrowDown'){ e.preventDefault(); sel&&sel.classList.remove('active'); opts[(idx+1)%opts.length].classList.add('active'); dd.querySelector('.active').scrollIntoView({block:'nearest'}); }
+      else if (e.key==='ArrowUp'){ e.preventDefault(); sel&&sel.classList.remove('active'); opts[idx<=0?opts.length-1:idx-1].classList.add('active'); dd.querySelector('.active').scrollIntoView({block:'nearest'}); }
+      else if (e.key==='Enter'&&sel){ e.preventDefault(); input.value=sel.dataset.ja; input.dispatchEvent(new Event('input')); hide(); }
+      else if (e.key==='Escape') hide();
+    });
+  };
+})();
+
+// ===== 明細行 =====
+function addRow(v={}) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="dt" type="date" value="${v.date||''}"></td>
+    <td class="tl"><input class="n" autocomplete="off" value="${v.name||''}" style="width:100%;min-width:120px" placeholder="品名・内容"></td>
+    <td><input class="q" type="number" min="0" value="${v.qty!=null?v.qty:1}" style="width:44px;text-align:center"></td>
+    <td><input class="u" value="${v.unit||'式'}" style="width:36px;text-align:center"></td>
+    <td><input class="p" type="number" min="0" value="${v.price||0}" style="width:80px;text-align:right"></td>
+    <td><select class="t"><option value="10">10%</option><option value="8">8%</option></select></td>
+    <td class="tr b">¥0</td>
+    <td class="op"><button class="del-btn" onclick="this.closest('tr').remove();calc()" title="削除">✕</button></td>`;
+  attachItemDropdown(tr.querySelector('.n'));
+  tr.querySelector('.t').value = String(v.tax||10);
+  tr.querySelectorAll('input,select').forEach(e => e.addEventListener('input', calc));
+  tbody.appendChild(tr);
+  calc();
+}
+
+// ===== 税込み/税抜き切換 =====
+let taxMode = 'excl';
+
+function setTaxMode(mode) {
+  taxMode = mode;
+  mode_excl.style.background = mode === 'excl' ? '#1a56db' : '#f0f4f8';
+  mode_excl.style.color      = mode === 'excl' ? '#fff'    : '#aab4c4';
+  mode_excl.style.fontWeight = mode === 'excl' ? '700'     : '400';
+  mode_incl.style.background = mode === 'incl' ? '#1a56db' : '#f0f4f8';
+  mode_incl.style.color      = mode === 'incl' ? '#fff'    : '#aab4c4';
+  mode_incl.style.fontWeight = mode === 'incl' ? '700'     : '400';
+  tax_mode_hint.textContent  = mode === 'incl' ? '▶ 税込み単価を入力してください' : '▶ 税抜き単価を入力してください';
+  th_price.textContent       = mode === 'incl' ? '単価（税込）' : '単価（税抜）';
+  calc();
+}
+
+// ===== 計算 =====
+function calc() {
+  let b8=0, b10=0;
+  [...tbody.querySelectorAll('tr')].forEach(tr => {
+    const q   = num(tr.querySelector('.q').value),
+          tax = Number(tr.querySelector('.t').value) === 8 ? 8 : 10,
+          p   = num(tr.querySelector('.p').value);
+    let base = 0;
+    if (q && p) {
+      base = taxMode === 'incl' ? round((q * p) / (1 + tax / 100)) : q * p;
+    }
+    if (tax === 8) b8 += base; else b10 += base;
+    tr.querySelector('.b').textContent = fmt(base);
+  });
+  const t10=round(b10*0.10), t8=round(b8*0.08), sub=b8+b10, taxSum=t8+t10, total=sub+taxSum;
+  v_sub.textContent        = fmt(sub);
+  v_tax_sum.textContent    = fmt(taxSum);
+  v_total.textContent      = Number(total).toLocaleString('ja-JP');
+  v_total2.textContent     = fmt(total);
+  v_tax10_base.textContent = fmt(b10); v_tax10_amt.textContent = fmt(t10);
+  v_tax8_base.textContent  = fmt(b8);  v_tax8_amt.textContent  = fmt(t8);
+
+  // 領収書側の金額・印紙判定を同期
+  r_total.textContent = Number(total).toLocaleString('ja-JP');
+  if (total >= 50000) {
+    inshi_box.innerHTML = '収入印紙<br>貼付';
+    inshi_box.style.color = '#334155';
+    inshi_box.style.borderColor = '#334155';
+    inshi_box.style.fontWeight = '600';
+  } else {
+    inshi_box.innerHTML = '電子領収書<br>につき<br>印紙不要';
+    inshi_box.style.color = '#9ca3af';
+    inshi_box.style.borderColor = '#9ca3af';
+    inshi_box.style.fontWeight = '400';
+  }
+}
+
+// ===== 印刷 =====
+function onPdfClick() {
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 1060;
+  if (!isMobile) { window.print(); return; }
+  document.body.classList.add('pdf-mode');
+  const clean = () => document.body.classList.remove('pdf-mode');
+  window.addEventListener('afterprint', clean, { once: true });
+  setTimeout(() => { window.print(); setTimeout(clean, 1200); }, 60);
+}
+
+// ===== 印影ドラッグ =====
+function bindStamp() {
+  let d=false, sx=0, sy=0, bx=0, by=0;
+  const w=stamp_wrap, p=paper;
+  const save  = () => localStorage.setItem(KSP, JSON.stringify({x:parseFloat(w.style.left)||0,y:parseFloat(w.style.top)||0}));
+  const apply = (x,y) => {
+    const mx=Math.max(0,p.clientWidth-w.offsetWidth), my=Math.max(0,p.clientHeight-w.offsetHeight);
+    w.style.left=Math.min(Math.max(0,x),mx)+'px'; w.style.top=Math.min(Math.max(0,y),my)+'px';
+    w.style.right='auto'; w.style.bottom='auto';
+  };
+  try { const t=JSON.parse(localStorage.getItem(KSP)||'{}'); if(t.x||t.y) apply(t.x||0,t.y||0); } catch(e) {}
+  w.addEventListener('mousedown', e => { d=true; sx=e.clientX; sy=e.clientY; bx=parseFloat(w.style.left)||0; by=parseFloat(w.style.top)||0; w.style.cursor='grabbing'; });
+  window.addEventListener('mousemove', e => { if(!d) return; apply(bx+e.clientX-sx, by+e.clientY-sy); });
+  window.addEventListener('mouseup',   () => { if(!d) return; d=false; w.style.cursor='grab'; save(); });
+}
+
+stamp_file.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { stamp_img.src=r.result; stamp_img.style.display='block'; };
+  r.readAsDataURL(f);
+});
+
+// ===== 初期化 =====
+(()=>{
+  const today = new Date().toISOString().slice(0,10);
+  doc_date.value = today;
+  doc_no.value   = 'RY-0000001';
+  loadIssuer();
+  syncReceipt();
+  bindStamp();
+  [i_zip, to_zip].forEach(el => el.addEventListener('blur', () => {
+    const v = el.value.trim();
+    if (v && !v.startsWith('〒')) { el.value = '〒' + v; el.dispatchEvent(new Event('input')); }
+  }));
+  addRow({date:today, qty:1, unit:'式', price:0, tax:10});
+})();
+</script>
+</body>
+</html>
