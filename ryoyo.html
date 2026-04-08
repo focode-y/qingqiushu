@@ -272,7 +272,7 @@ table.items .del-btn:hover{color:#c53030}
       <div>
         <div class="ryoshu-to"><span id="r_to_name">　</span> 様</div>
         <div class="ryoshu-amount">¥<span id="r_total">0</span><em>（税込）</em></div>
-        <div class="ryoshu-tadashi">但し、<span id="r_tadashi">中古品代として</span></div>
+        <div class="ryoshu-tadashi" id="r_tadashi_row" style="display:none">但し、<span id="r_tadashi"></span></div>
         <div class="ryoshu-confirm">上記正に領収いたしました。</div>
       </div>
       <div class="ryoshu-right">
@@ -398,7 +398,9 @@ function syncReceipt() {
   // 日付
   r_date.textContent = doc_date.value || '';
   // 但し書き
-  r_tadashi.textContent = i_tadashi.value.trim() || '中古品代として';
+  const tadashi = i_tadashi.value.trim();
+  r_tadashi.textContent = tadashi;
+  r_tadashi_row.style.display = tadashi ? '' : 'none';
 }
 
 to_name.addEventListener('input', syncReceipt);
@@ -520,19 +522,8 @@ function calc() {
   v_tax10_base.textContent = fmt(b10); v_tax10_amt.textContent = fmt(t10);
   v_tax8_base.textContent  = fmt(b8);  v_tax8_amt.textContent  = fmt(t8);
 
-  // 領収書側の金額・印紙判定を同期
+  // 領収書側の金額を同期
   r_total.textContent = Number(total).toLocaleString('ja-JP');
-  if (total >= 50000) {
-    inshi_box.innerHTML = '収入印紙<br>貼付';
-    inshi_box.style.color = '#334155';
-    inshi_box.style.borderColor = '#334155';
-    inshi_box.style.fontWeight = '600';
-  } else {
-    inshi_box.innerHTML = '電子領収書<br>につき<br>印紙不要';
-    inshi_box.style.color = '#9ca3af';
-    inshi_box.style.borderColor = '#9ca3af';
-    inshi_box.style.fontWeight = '400';
-  }
 }
 
 // ===== 印刷 =====
